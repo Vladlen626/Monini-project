@@ -41,7 +41,7 @@ namespace PlatformCore.Core
 			return false;
 		}
 
-		public IEnumerable<IService> All => _services.Values;
+		public IEnumerable<IService> All => new HashSet<IService>(_services.Values);
 
 		public bool Has<T>() where T : class, IService
 			=> _services.ContainsKey(typeof(T));

@@ -29,42 +29,66 @@ namespace _Main.Scripts.Core
 			var splashScreenService = new SplashScreenService(uiService);
 			var sceneService = new SceneService(logger);
 
-			Services.Register<ILoggerService, LoggerService>(logger);
-			Services.Register<IInputService, InputBaseService>(inputService);
-			Services.Register<IResourceService, ResourceService>(resourcesService);
-			Services.Register<IObjectFactory, ObjectFactory>(objectFactory);
-			Services.Register<ICameraService, CameraAsyncService>(cameraService);
-			Services.Register<ICameraShakeService, CameraAsyncService>(cameraService);
-			Services.Register<IAudioService, AudioBaseService>(audioService);
-			Services.Register<IUIService, UIBaseService>(uiService);
-			Services.Register<ICursorService, CursorService>(cursorService);
-			Services.Register<ISplashScreenService, SplashScreenService>(splashScreenService);
-			Services.Register<ISceneService, SceneService>(sceneService);
+			//Network
+			var networkService = new NetworkService();
+
+			//Register
+			_serviceLocator.Register<ILoggerService, LoggerService>(logger);
+			_serviceLocator.Register<IInputService, InputBaseService>(inputService);
+			_serviceLocator.Register<IResourceService, ResourceService>(resourcesService);
+			_serviceLocator.Register<IObjectFactory, ObjectFactory>(objectFactory);
+			_serviceLocator.Register<ICameraService, CameraAsyncService>(cameraService);
+			_serviceLocator.Register<ICameraShakeService, CameraAsyncService>(cameraService);
+			_serviceLocator.Register<IAudioService, AudioBaseService>(audioService);
+			_serviceLocator.Register<IUIService, UIBaseService>(uiService);
+			_serviceLocator.Register<ICursorService, CursorService>(cursorService);
+			_serviceLocator.Register<ISplashScreenService, SplashScreenService>(splashScreenService);
+			_serviceLocator.Register<ISceneService, SceneService>(sceneService);
+
+			//Network Services Register
+			_serviceLocator.Register<INetworkService, NetworkService>(networkService);
 
 			Debug.Log("[GameRoot] Services finally registered.!");
 		}
 
 		protected override async UniTask LaunchGameAsync(GameContext context)
 		{
-			var splash = Services.Get<ISplashScreenService>();
-			var input = Services.Get<IInputService>();
-			var scene = Services.Get<ISceneService>();
-			var audio = Services.Get<IAudioService>();
-			var ui = Services.Get<IUIService>();
-			var cursor = Services.Get<ICursorService>();
+			var splash = _serviceLocator.Get<ISplashScreenService>();
+			var input = _serviceLocator.Get<IInputService>();
+			var scene = _serviceLocator.Get<ISceneService>();
+			var audio = _serviceLocator.Get<IAudioService>();
+			var ui = _serviceLocator.Get<IUIService>();
+			var cursor = _serviceLocator.Get<ICursorService>();
+			var network = _serviceLocator.Get<INetworkService>();
 
 			input.DisableAllInputs();
 			cursor.UnlockCursor();
 
 			await scene.LoadSceneAsync(SceneNames.Hub, ApplicationCancellationToken);
-			Vector3 spawn = Vector3.zero;
 
-			var playerFactory = new PlayerFactory(Services);
-			var playerModel = new PlayerConfig();
-			var playerView = await playerFactory.CreatePlayerView(spawn);
+			var networkControllers = new IBaseController[]
+			{
+				new NetworkPlayerSpawnController(_serviceLocator, _lifecycle),
+			};
 
-			await UniTask.WhenAll(playerFactory.GetPlayerBaseControllers(playerModel, playerView)
-				.Select(c => Lifecycle.RegisterAsync(c)));
+			foreach (var controller in networkControllers)
+			{
+				await _lifecycle.RegisterAsync(controller);
+			}
+
+#if UNITY_EDITOR
+			var tag = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags()[0];
+			if (tag == "Client") // Тег твоего второго игрока
+			{
+				network.StartClient();
+			}
+			else
+			{
+				network.StartHost();
+			}
+#else
+    network.StartHost(); // обычный билд
+#endif
 
 			input.EnableAllInputs();
 			cursor.LockCursor();

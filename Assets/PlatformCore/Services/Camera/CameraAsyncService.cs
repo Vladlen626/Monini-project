@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace PlatformCore.Services
 {
-	public class CameraAsyncService : BaseAsyncService, ICameraService, ICameraShakeService
+	public class CameraAsyncService : BaseAsyncService, ICameraService
 	{
 		private const string PlayerCamera = "PlayerCamera";
 		private readonly IObjectFactory _objectFactory;

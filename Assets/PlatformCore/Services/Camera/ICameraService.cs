@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PlatformCore.Services
 {
-	public interface ICameraService
+	public interface ICameraService : ICameraShakeService
 	{
 		void AttachTo(Transform target);
 		Transform GetCameraTransform();

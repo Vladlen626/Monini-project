@@ -22,7 +22,7 @@ namespace PlatformCore.Infrastructure.Lifecycle
 			{
 				await preloadable.PreloadAsync();
 			}
-			
+
 			if (obj is IActivatable activatable)
 			{
 				activatable.Activate();
