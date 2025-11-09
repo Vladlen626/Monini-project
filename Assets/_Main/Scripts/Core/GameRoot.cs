@@ -19,10 +19,8 @@ namespace _Main.Scripts.Core
 			Debug.Log("[GameRoot] Register services...");
 
 			var logger = new LoggerService();
-			var inputService = new InputBaseService();
 			var resourcesService = new ResourceService(logger);
 			var objectFactory = new ObjectFactory(resourcesService, logger);
-			var cameraService = new CameraAsyncService(objectFactory);
 			var audioService = new AudioBaseService(logger);
 			var uiService = new UIBaseService(logger, resourcesService, context.StaticCanvas, context.DynamicCanvas);
 			var cursorService = new CursorService(uiService);
@@ -34,11 +32,8 @@ namespace _Main.Scripts.Core
 
 			//Register
 			_serviceLocator.Register<ILoggerService, LoggerService>(logger);
-			_serviceLocator.Register<IInputService, InputBaseService>(inputService);
 			_serviceLocator.Register<IResourceService, ResourceService>(resourcesService);
 			_serviceLocator.Register<IObjectFactory, ObjectFactory>(objectFactory);
-			_serviceLocator.Register<ICameraService, CameraAsyncService>(cameraService);
-			_serviceLocator.Register<ICameraShakeService, CameraAsyncService>(cameraService);
 			_serviceLocator.Register<IAudioService, AudioBaseService>(audioService);
 			_serviceLocator.Register<IUIService, UIBaseService>(uiService);
 			_serviceLocator.Register<ICursorService, CursorService>(cursorService);
@@ -54,14 +49,12 @@ namespace _Main.Scripts.Core
 		protected override async UniTask LaunchGameAsync(GameContext context)
 		{
 			var splash = _serviceLocator.Get<ISplashScreenService>();
-			var input = _serviceLocator.Get<IInputService>();
 			var scene = _serviceLocator.Get<ISceneService>();
 			var audio = _serviceLocator.Get<IAudioService>();
 			var ui = _serviceLocator.Get<IUIService>();
 			var cursor = _serviceLocator.Get<ICursorService>();
 			var network = _serviceLocator.Get<INetworkService>();
-
-			input.DisableAllInputs();
+			
 			cursor.UnlockCursor();
 
 			await scene.LoadSceneAsync(SceneNames.Hub, ApplicationCancellationToken);
@@ -89,8 +82,7 @@ namespace _Main.Scripts.Core
 #else
     network.StartHost(); // обычный билд
 #endif
-
-			input.EnableAllInputs();
+	
 			cursor.LockCursor();
 		}
 	}

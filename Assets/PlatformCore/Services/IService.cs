@@ -16,3 +16,8 @@ public interface ISyncInitializable : IService
 {
 	void Initialize();
 }
+
+public interface IPlayerLocalService : IDisposable
+{
+	UniTask InitAsync(CancellationToken ct);
+}

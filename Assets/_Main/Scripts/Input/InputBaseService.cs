@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace _Main.Scripts.Core.Services
 {
-	public class InputBaseService : IInputService, ISyncInitializable
+	public class InputLocalService : PlayerLocalService, IInputService
 	{
 		public event Action OnJumpPressed;
 		public event Action OnJumpReleased;
@@ -21,12 +23,13 @@ namespace _Main.Scripts.Core.Services
 		private Vector2 _lookInput;
 		private bool _cancelInput;
 
-		public void Initialize()
+		protected override UniTask OnInitAsync(CancellationToken ct)
 		{
 			_actions = new InputSystem_Actions();
 
 			BindActions();
 			EnableAllInputs();
+			return UniTask.CompletedTask;
 		}
 
 		public void EnableAllInputs()

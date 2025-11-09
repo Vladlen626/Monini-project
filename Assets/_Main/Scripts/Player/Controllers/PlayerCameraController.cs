@@ -15,10 +15,10 @@ namespace _Main.Scripts.Player
 		private readonly PlayerView _playerView;
 		private readonly ICameraShakeService _cameraShakeService;
 
-		public PlayerCameraController(ServiceLocator serviceLocator, PlayerView playerView)
+		public PlayerCameraController(ICameraService cameraService, IInputService inputService, PlayerView playerView)
 		{
-			_inputService = serviceLocator.Get<IInputService>();
-			_cameraShakeService = serviceLocator.Get<ICameraShakeService>();
+			_inputService = inputService;
+			_cameraShakeService = cameraService;
 			_playerView = playerView;
 		}
 

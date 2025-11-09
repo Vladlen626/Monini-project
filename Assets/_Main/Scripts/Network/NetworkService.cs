@@ -40,9 +40,12 @@ namespace _Main.Scripts.Core
 			_manager.Shutdown();
 		}
 
-		public void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge)
+		public void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge, bool isOwner)
 		{
-			OnLocalPlayerSpawned?.Invoke(bridge);
+			if (isOwner)
+			{
+				OnLocalPlayerSpawned?.Invoke(bridge);
+			}
 		}
 
 		private void OnClientConnectedHandler(ulong clientId)

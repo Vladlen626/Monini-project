@@ -1,4 +1,5 @@
 using _Main.Scripts.Core;
+using PlatformCore.Core;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,21 +7,16 @@ using UnityEngine;
 public class PlayerNetworkBridge : NetworkBehaviour
 {
 	public PlayerView playerView => _playerView;
-	
-	private INetworkService _network;
 	private PlayerView _playerView;
-
-	public void Initialize(INetworkService networkService, PlayerView inPlayerView)
+	private INetworkService _network;
+	public void Initialize(PlayerView inPlayerView)
 	{
-		_network = networkService;
 		_playerView = inPlayerView;
 	}
 
 	public override void OnNetworkSpawn()
 	{
-		if (IsOwner)
-		{
-			_network.InvokeLocalPlayerSpawned(this);
-		}
+		_network = Locator.Resolve<INetworkService>();
+		_network.InvokeLocalPlayerSpawned(this, IsOwner);
 	}
 }

@@ -20,6 +20,7 @@ namespace PlatformCore.Core
 				UnityEngine.Debug.LogWarning($"Service {key.Name} already registered. Skipped.");
 			}
 		}
+		
 
 		public T Get<T>() where T : class
 		{

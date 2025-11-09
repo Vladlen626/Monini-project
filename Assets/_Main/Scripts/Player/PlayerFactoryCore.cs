@@ -29,17 +29,17 @@ namespace _Main.Scripts.Player
 			return playerView;
 		}
 
-		public IBaseController[] GetPlayerBaseControllers(PlayerConfig playerConfig, PlayerView playerView)
+		public IBaseController[] GetPlayerBaseControllers(
+			PlayerConfig cfg,
+			PlayerView view,
+			IInputService input,
+			ICameraService camera)
 		{
-			var inputService = _serviceLocator.Get<IInputService>();
-			var cameraService = _serviceLocator.Get<ICameraService>();
-
 			return new IBaseController[]
 			{
-				new PlayerMovementController(inputService, playerConfig, playerView,
-					cameraService.GetCameraTransform()),
-				new PlayerCameraController(_serviceLocator, playerView),
-				new PlayerAnimationController(inputService, playerConfig, playerView),
+				new PlayerMovementController(input, cfg, view, camera.GetCameraTransform()),
+				new PlayerCameraController(camera, input, view),
+				new PlayerAnimationController(input, cfg, view),
 			};
 		}
 	}

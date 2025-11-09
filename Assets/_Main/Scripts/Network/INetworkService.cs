@@ -18,6 +18,6 @@ namespace _Main.Scripts.Core
 		void StartClient();
 		void Stop();
 		
-		void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge);
+		void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge, bool isOwner);
 	}
 }

@@ -20,6 +20,7 @@ namespace PlatformCore.Core
 		protected BaseGameRoot()
 		{
 			_serviceLocator = new ServiceLocator();
+			Locator.Set(_serviceLocator);
 			_lifecycle = new LifecycleManager();
 			_lifetimeService = new ApplicationLifetimeService();
 		}
@@ -72,6 +73,7 @@ namespace PlatformCore.Core
 		{
 			try
 			{
+				Locator.Clear();
 				_lifetimeService?.Dispose();
 				_lifecycle?.Dispose();
 				_serviceLocator?.Dispose();

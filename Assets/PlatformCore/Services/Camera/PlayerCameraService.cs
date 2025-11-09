@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace PlatformCore.Services
 {
-	public class CameraAsyncService : BaseAsyncService, ICameraService
+	public class CameraLocalService : PlayerLocalService, ICameraService
 	{
 		private const string PlayerCamera = "PlayerCamera";
 		private readonly IObjectFactory _objectFactory;
@@ -16,12 +16,12 @@ namespace PlatformCore.Services
 		private CancellationTokenSource _shakeCts;
 		public bool IsShaking { get; private set; }
 
-		public CameraAsyncService(IObjectFactory objectFactory)
+		public CameraLocalService(IObjectFactory objectFactory)
 		{
 			_objectFactory = objectFactory;
 		}
 
-		protected override async UniTask OnPostInitializeAsync(CancellationToken ct)
+		protected override async UniTask OnInitAsync(CancellationToken ct)
 		{
 			_camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Main.CinemachineCamera,
 				Vector3.zero, Quaternion.identity);
@@ -111,7 +111,6 @@ namespace PlatformCore.Services
 			{
 				return;
 			}
-
 
 			_shakeCts?.Cancel();
 			_noise.AmplitudeGain = 0;
