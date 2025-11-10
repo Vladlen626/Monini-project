@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using _Main.Scripts.Core;
 using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player;
@@ -13,17 +14,17 @@ public class NetworkPlayerSpawnController : IBaseController, IActivatable
 {
 	private readonly INetworkService _networkService;
 	private readonly IObjectFactory _objectFactory;
-	private readonly PlayerFactoryCore _playerFactoryCore;
+	private readonly PlayerFactory _playerFactory;
 	private readonly LifecycleManager _lifecycle;
 
-	private Dictionary<ulong, PlayerContext> _ownerContexts = new ();
+	private Dictionary<ulong, PlayerContext> _ownerContexts = new();
 
 
 	public NetworkPlayerSpawnController(ServiceLocator serviceLocator, LifecycleManager lifecycle)
 	{
 		_networkService = serviceLocator.Get<INetworkService>();
 		_objectFactory = serviceLocator.Get<IObjectFactory>();
-		_playerFactoryCore = new PlayerFactoryCore(serviceLocator);
+		_playerFactory = new PlayerFactory(serviceLocator);
 		_lifecycle = lifecycle;
 	}
 
@@ -43,6 +44,11 @@ public class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 	private void OnClientConnectedHandler(ulong clientId)
 	{
+		if (_ownerContexts.ContainsKey(clientId))
+		{
+			return;
+		}
+
 		SpawnPlayerAsync(clientId).Forget();
 	}
 
@@ -50,7 +56,7 @@ public class NetworkPlayerSpawnController : IBaseController, IActivatable
 	{
 		if (_ownerContexts.TryGetValue(clientId, out var ctx))
 		{
-			foreach (var valueController in ctx.controllers)
+			foreach (var valueController in ctx.Controllers)
 			{
 				_lifecycle.Unregister(valueController);
 			}
@@ -60,6 +66,7 @@ public class NetworkPlayerSpawnController : IBaseController, IActivatable
 		}
 	}
 
+	//server
 	private async UniTask SpawnPlayerAsync(ulong clientId)
 	{
 		if (!_networkService.IsServer)
@@ -67,25 +74,32 @@ public class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		var playerView = await _playerFactoryCore.CreatePlayerView(Vector3.zero);
+		var playerView = await _playerFactory.CreatePlayerView(Vector3.zero);
 		var bridge = playerView.GetComponent<PlayerNetworkBridge>();
 		bridge.Initialize(playerView);
 		bridge.NetworkObject.SpawnWithOwnership(clientId);
+
+		var ctx = await PlayerContext.Server.CreateAsync(playerView, _objectFactory, _playerFactory,
+			CancellationToken.None);
+		foreach (var c in ctx.Controllers)
+		{
+			await _lifecycle.RegisterAsync(c);
+		}
+
+		_ownerContexts[clientId] = ctx;
 	}
 
+	//client
 	private async void OnLocalPlayerSpawnedHandler(PlayerNetworkBridge bridge)
 	{
-		var factory = _playerFactoryCore;
+		var ctx = await PlayerContext.Client.CreateAsync(bridge.playerView, _objectFactory, _playerFactory,
+			CancellationToken.None);
 
-		var ctx = await PlayerContext.CreateAsync(bridge.playerView, _objectFactory, default);
-		ctx.сamera.AttachTo(ctx.view.CameraRoot);
+		ctx.Camera.AttachTo(ctx.View.CameraRoot);
 
-		var controllers = factory.GetPlayerBaseControllers(ctx.сonfig, bridge.playerView, ctx.input, ctx.сamera);
-
-		foreach (var baseController in controllers)
+		foreach (var c in ctx.Controllers)
 		{
-			ctx.AddController(baseController);
-			await _lifecycle.RegisterAsync(baseController);
+			await _lifecycle.RegisterAsync(c);
 		}
 
 		_ownerContexts[bridge.OwnerClientId] = ctx;

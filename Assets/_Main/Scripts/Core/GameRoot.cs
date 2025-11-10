@@ -70,10 +70,18 @@ namespace _Main.Scripts.Core
 			}
 
 #if UNITY_EDITOR
-			var tag = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags()[0];
-			if (tag == "Client") // Тег твоего второго игрока
+			var tags = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags();
+			if (tags is { Length: > 0 })
 			{
-				network.StartClient();
+				var tag = tags[0];
+				if (tag == "Client") // Тег твоего второго игрока
+				{
+					network.StartClient();
+				}
+				else
+				{
+					network.StartHost();
+				}
 			}
 			else
 			{

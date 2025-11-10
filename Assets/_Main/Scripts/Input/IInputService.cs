@@ -24,5 +24,7 @@ namespace _Main.Scripts.Core.Services
 
 		void EnableUIInputs();
 		void DisableUIInputs();
+		
+		void OverrideNetworkInput(Vector2 move, bool jump);
 	}
 }

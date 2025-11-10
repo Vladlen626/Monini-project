@@ -55,7 +55,7 @@ namespace _Main.Scripts.Core
 
 		private void OnClientDisconnectHandler(ulong clientId)
 		{
-			OnClientConnected?.Invoke(clientId);
+			OnClientDisconnected?.Invoke(clientId);
 		}
 
 		public void Dispose()

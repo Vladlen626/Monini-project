@@ -54,6 +54,12 @@ namespace _Main.Scripts.Core.Services
 			_actions.UI.Disable();
 		}
 
+		public void OverrideNetworkInput(Vector2 move, bool jump)
+		{
+			Move = move;
+			IsJumping = jump;
+		}
+
 		public void EnablePlayerInputs()
 		{
 			_actions.Player.Enable();
@@ -61,7 +67,7 @@ namespace _Main.Scripts.Core.Services
 
 		public void DisablePlayerInputs()
 		{
-			_actions.Player.Enable();
+			_actions.Player.Disable();
 		}
 
 		private void BindActions()
@@ -97,7 +103,7 @@ namespace _Main.Scripts.Core.Services
 			_actions.UI.Cancel.started += _ => OnPausePressed?.Invoke();
 		}
 
-		public void Dispose()
+		public override void Dispose()
 		{
 			if (_actions != null)
 			{

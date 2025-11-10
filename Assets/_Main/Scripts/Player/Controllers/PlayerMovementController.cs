@@ -37,6 +37,8 @@ namespace _Main.Scripts.Player
 		private Vector3 _pendingImpulseXZ;
 		private float _suppressJumpTimer;
 
+		//network
+		private PlayerNetworkBridge _bridge;
 
 		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, PlayerView playerView,
 			Transform cameraTransform)
@@ -49,25 +51,76 @@ namespace _Main.Scripts.Player
 
 		public void OnUpdate(float deltaTime)
 		{
-			HandleMovement(deltaTime);
+			if (!_bridge)
+			{
+				_bridge = _playerView.GetComponent<PlayerNetworkBridge>();
+			}
+
+			if (_bridge.IsOwner)
+			{
+				var inputData = CollectInput();
+
+				if (_bridge.IsServer)
+				{
+					_bridge.SetCachedInput(inputData);
+				}
+				else
+				{
+					_bridge.SendInputServerRpc(inputData);
+					HandleMovement(deltaTime, inputData);
+				}
+			}
+
+			// Сервер (включая хост): считает авторитетно один раз
+			if (_bridge.IsServer)
+			{
+				HandleMovement(deltaTime, _bridge.CachedInput);
+			}
 		}
 
-		private void HandleMovement(float dt)
+		private PlayerInputData CollectInput()
+		{
+			if (_inputService == null)
+			{
+				return default;
+			}
+
+			return new PlayerInputData
+			{
+				Move = _inputService.Move,
+				IsJumping = _inputService.IsJumping,
+				IsSprinting = _inputService.IsSprinting
+			};
+		}
+
+		private void HandleMovement(float dt, in PlayerInputData inputData)
 		{
 			// === Grounded / Coyote ===
 			_isGrounded = _playerView.IsGrounded;
 			_coyoteTimer = _isGrounded ? _playerConfig.coyoteTime : Mathf.Max(0f, _coyoteTimer - dt);
 
+			//Server safe
+			if (_cameraTransform)
+			{
+				_cameraForward = _cameraTransform.forward;
+				_cameraRight = _cameraTransform.right;
+			}
+			else
+			{
+				_cameraForward = Vector3.forward;
+				_cameraRight = Vector3.right;
+			}
+
 			// === Jump buffer ===
-			bool jumpHeld = _inputService.IsJumping;
+			bool jumpHeld = inputData.IsJumping;
 			bool jumpPressedThisFrame = jumpHeld && !_prevJumpHeld;
 			_prevJumpHeld = jumpHeld;
 			if (jumpPressedThisFrame) _jumpBufferTimer = _playerConfig.jumpBuffer;
 			else _jumpBufferTimer = Mathf.Max(0f, _jumpBufferTimer - dt);
 
 			// === Ввод и базовое желаемое направление (камеро-ориентированное) ===
-			Vector2 in2 = _inputService.Move;
-			_cameraForward = _cameraTransform.forward;
+			Vector2 in2 = inputData.Move;
+
 			_cameraForward.y = 0f;
 			float forwardMag = _cameraForward.sqrMagnitude;
 			if (forwardMag > Mathf.Epsilon)
@@ -77,7 +130,7 @@ namespace _Main.Scripts.Player
 				_cameraForward.z *= invMag;
 			}
 
-			_cameraRight = _cameraTransform.right;
+
 			_cameraRight.y = 0f;
 			float rightMag = _cameraRight.sqrMagnitude;
 			if (rightMag > Mathf.Epsilon)
@@ -107,7 +160,7 @@ namespace _Main.Scripts.Player
 			}
 
 			// === Целевая скорость ===
-			float maxSpeed = _inputService.IsSprinting ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
+			float maxSpeed = inputData.IsSprinting ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
 			_targetVelXZ.x = _desiredDirection.x * maxSpeed;
 			_targetVelXZ.y = 0f;
 			_targetVelXZ.z = _desiredDirection.z * maxSpeed;
@@ -153,7 +206,7 @@ namespace _Main.Scripts.Player
 					_velXZ.x += _desiredDirection.x * invMag * 2f;
 					_velXZ.z += _desiredDirection.z * invMag * 2f;
 				}
-				
+
 				_isGrounded = false;
 			}
 
@@ -196,6 +249,7 @@ namespace _Main.Scripts.Player
 			float speed01 = Mathf.Clamp01(_velXZ.magnitude / Mathf.Max(0.01f, maxSpeed));
 			float rotSpeed = Mathf.Lerp(_playerConfig.minRotateSpeed, _playerConfig.maxRotateSpeed, speed01);
 			_playerView.SetRotateSpeed(rotSpeed);
+			Debug.Log($"MOVE_CALL: server={_bridge.IsServer}, owner={_bridge.IsOwner}, y={_verticalY}");
 			_playerView.ApplyMovement(_velocity);
 		}
 

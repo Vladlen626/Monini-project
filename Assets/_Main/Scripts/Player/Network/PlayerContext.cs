@@ -8,60 +8,16 @@ using PlatformCore.Core;
 using PlatformCore.Services;
 using PlatformCore.Services.Factory;
 
-public sealed class PlayerContext : IDisposable
+public abstract class PlayerContext : IDisposable
 {
-	public PlayerView view { get; }
-	public IInputService input { get; }
-	public ICameraService сamera { get; }
-	public PlayerConfig сonfig { get; }
-	public List<IBaseController> controllers => _controllers;
+	public PlayerView View { get; protected set; }
+	public PlayerConfig Config { get; protected set; }
+	public List<IBaseController> Controllers { get; protected set; } = new();
 
-	private readonly List<IPlayerLocalService> _locals = new();
-	private readonly List<IBaseController> _controllers = new();
-
-	private PlayerContext(PlayerView view, IInputService input, ICameraService сamera, PlayerConfig сonfig)
-	{
-		this.view = view;
-		this.input = input;
-		this.сamera = сamera;
-		this.сonfig = сonfig;
-	}
-
-	public void AddController(IBaseController controller)
-	{
-		if (controllers.Contains(controller))
-		{
-			return;
-		}
-
-		controllers.Add(controller);
-	}
-
-	public static async UniTask<PlayerContext> CreateAsync(
-		PlayerView view, IObjectFactory factory, CancellationToken ct)
-	{
-		var input = new InputLocalService();
-		var camera = new CameraLocalService(factory);
-
-		var localServices = new IPlayerLocalService[]
-		{
-			input,
-			camera
-		};
-
-		foreach (var s in localServices)
-		{
-			await s.InitAsync(ct);
-		}
-
-		var ctx = new PlayerContext(view, input, camera, new PlayerConfig());
-		ctx._locals.AddRange(localServices);
-
-		return ctx;
-	}
+	protected readonly List<IPlayerLocalService> _locals = new();
 
 	// ReSharper disable Unity.PerformanceAnalysis
-	public void Dispose()
+	public virtual void Dispose()
 	{
 		foreach (var s in _locals)
 		{
@@ -69,5 +25,79 @@ public sealed class PlayerContext : IDisposable
 		}
 
 		_locals.Clear();
+	}
+
+	// ─────────────────────────────────────────────────────────────
+	// CLIENT CONTEXT
+	// ─────────────────────────────────────────────────────────────
+	public sealed class Client : PlayerContext
+	{
+		public IInputService Input { get; private set; }
+		public ICameraService Camera { get; private set; }
+
+		private Client()
+		{
+		}
+
+		public static async UniTask<Client> CreateAsync(
+			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
+		{
+			var ctx = new Client
+			{
+				View = view,
+				Config = new PlayerConfig()
+			};
+
+			var input = new InputLocalService();
+			var camera = new CameraLocalService(factory);
+
+			await input.InitAsync(ct);
+			await camera.InitAsync(ct);
+
+			ctx._locals.Add(input);
+			ctx._locals.Add(camera);
+
+			ctx.Input = input;
+			ctx.Camera = camera;
+			
+			ctx.Controllers.AddRange(
+				playerFactory.GetPlayerBaseControllers(ctx.Config, view, input, camera)
+			);
+
+			return ctx;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			Input = null;
+			Camera = null;
+		}
+	}
+
+	// ─────────────────────────────────────────────────────────────
+	// SERVER CONTEXT
+	// ─────────────────────────────────────────────────────────────
+	public sealed class Server : PlayerContext
+	{
+		private Server()
+		{
+		}
+
+		public static async UniTask<Server> CreateAsync(
+			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
+		{
+			var ctx = new Server
+			{
+				View = view,
+				Config = new PlayerConfig()
+			};
+			
+			ctx.Controllers.AddRange(
+				playerFactory.GetServerControllers(ctx.Config, view)
+			);
+
+			return ctx;
+		}
 	}
 }
