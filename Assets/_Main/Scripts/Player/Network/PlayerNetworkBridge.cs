@@ -1,6 +1,10 @@
+using System.Threading;
 using _Main.Scripts.Core;
+using _Main.Scripts.Player;
+using FishNet.Object;
 using PlatformCore.Core;
-using Unity.Netcode;
+using PlatformCore.Infrastructure.Lifecycle;
+using PlatformCore.Services.Factory;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerView))]
@@ -9,45 +13,34 @@ public class PlayerNetworkBridge : NetworkBehaviour
 	public PlayerView playerView => _playerView;
 	private PlayerView _playerView;
 	private INetworkService _network;
-	
-	private float _jumpBufferEndTime;
-	private const float JumpBufferLifetime = 0.15f;
-	
-	private PlayerInputData _cachedInput;
-	public ref readonly PlayerInputData CachedInput => ref _cachedInput;
 
 	public void Initialize(PlayerView inPlayerView)
 	{
 		_playerView = inPlayerView;
 	}
 
-	public override void OnNetworkSpawn()
+	public override async void OnStartClient()
 	{
-		_network = Locator.Resolve<INetworkService>();
-		_network.InvokeLocalPlayerSpawned(this, IsOwner);
-	}
-	
-	public void SetCachedInput(PlayerInputData input)
-	{
-		_cachedInput = input;
-	}
-	
-	[ServerRpc]
-	public void SendInputServerRpc(PlayerInputData input)
-	{
-		_cachedInput.Move = input.Move;
-		_cachedInput.IsSprinting = input.IsSprinting;
+		base.OnStartClient();
 
-		if (input.IsJumping)
+		if (!IsOwner)
 		{
-			_jumpBufferEndTime = Time.time + JumpBufferLifetime;
+			return;
 		}
-	}
+		
+		var locator = Locator._current;
+		var objectFactory = locator.Get<IObjectFactory>();
+		var playerFactory = new PlayerFactory(locator);
+		var lifecycle = locator.Get<LifecycleManager>();
 
-	public PlayerInputData GetBufferedInput()
-	{
-		var input = _cachedInput;
-		input.IsJumping = Time.time < _jumpBufferEndTime;
-		return input;
+		var ctx = await PlayerContext.Client.CreateAsync(playerView, objectFactory, playerFactory,
+			CancellationToken.None);
+
+		ctx.Camera.AttachTo(ctx.View.CameraRoot);
+
+		foreach (var c in ctx.Controllers)
+		{
+			await lifecycle.RegisterAsync(c);
+		}
 	}
 }

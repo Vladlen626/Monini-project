@@ -1,67 +1,60 @@
 ﻿using System;
+using FishNet;
+using FishNet.Connection;
+using FishNet.Managing;
+using FishNet.Transporting;
 using PlatformCore.Core;
-using Unity.Netcode;
 using Object = UnityEngine.Object;
 
 namespace _Main.Scripts.Core
 {
 	public class NetworkService : INetworkService, IService
 	{
-		public event Action<ulong> OnClientConnected;
-		public event Action<ulong> OnClientDisconnected;
-		public event Action<PlayerNetworkBridge> OnLocalPlayerSpawned;
+		private readonly NetworkManager _networkManager;
+		public bool IsServer => _networkManager.ServerManager.Started;
 
-		public bool IsServer => _manager.IsServer;
-		public bool IsClient => _manager.IsClient;
-		public bool IsHost => _manager.IsHost;
-		public ulong LocalClientId => _manager.LocalClientId;
+		public bool IsClient => _networkManager.ClientManager.Started;
 
-		private readonly NetworkManager _manager;
+		public bool IsHost => IsServer && IsClient;
+
+		public int LocalClientId => _networkManager.ClientManager.Connection.ClientId;
 
 		public NetworkService()
 		{
-			_manager = Object.FindFirstObjectByType<NetworkManager>();
-			_manager.OnClientConnectedCallback += OnClientConnectedHandler;
-			_manager.OnClientDisconnectCallback += OnClientDisconnectHandler;
+			_networkManager = InstanceFinder.NetworkManager;
 		}
 
+		public NetworkConnection GetClientConnection(int clientId)
+		{
+			return _networkManager.ServerManager.Clients[clientId];
+		}
+		
 		public void StartHost()
 		{
-			_manager.StartHost();
+			_networkManager.ServerManager.StartConnection();
+			_networkManager.ClientManager.StartConnection();
 		}
 
 		public void StartClient()
 		{
-			_manager.StartClient();
+			_networkManager.ClientManager.StartConnection();
 		}
 
 		public void Stop()
 		{
-			_manager.Shutdown();
-		}
-
-		public void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge, bool isOwner)
-		{
-			if (isOwner)
+			if (IsClient)
 			{
-				OnLocalPlayerSpawned?.Invoke(bridge);
+				_networkManager.ClientManager.StopConnection();
 			}
-		}
 
-		private void OnClientConnectedHandler(ulong clientId)
-		{
-			OnClientConnected?.Invoke(clientId);
-		}
-
-		private void OnClientDisconnectHandler(ulong clientId)
-		{
-			OnClientDisconnected?.Invoke(clientId);
+			if (_networkManager.ServerManager.Started)
+			{
+				_networkManager.ServerManager.StopConnection(true);
+			}
 		}
 
 		public void Dispose()
 		{
-			_manager.OnClientConnectedCallback -= OnClientConnectedHandler;
-			_manager.OnClientDisconnectCallback -= OnClientDisconnectHandler;
 		}
 	}
 }

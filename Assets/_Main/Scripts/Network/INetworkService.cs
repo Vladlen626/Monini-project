@@ -1,5 +1,6 @@
 ﻿using System;
-using Unity.Netcode;
+using FishNet.Connection;
+using FishNet.Managing;
 
 namespace _Main.Scripts.Core
 {
@@ -8,16 +9,10 @@ namespace _Main.Scripts.Core
 		bool IsServer { get; }
 		bool IsClient { get; }
 		bool IsHost { get; }
-		ulong LocalClientId { get; }
-
-		event Action<ulong> OnClientConnected;
-		event Action<ulong> OnClientDisconnected;
-		event Action<PlayerNetworkBridge> OnLocalPlayerSpawned;
-
+		int LocalClientId { get; }
 		void StartHost();
 		void StartClient();
 		void Stop();
-		
-		void InvokeLocalPlayerSpawned(PlayerNetworkBridge bridge, bool isOwner);
+		NetworkConnection GetClientConnection(int clientId);
 	}
 }

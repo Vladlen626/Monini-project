@@ -54,14 +54,18 @@ namespace _Main.Scripts.Core
 			var ui = _serviceLocator.Get<IUIService>();
 			var cursor = _serviceLocator.Get<ICursorService>();
 			var network = _serviceLocator.Get<INetworkService>();
+			var objectFactory = _serviceLocator.Get<IObjectFactory>();
 			
 			cursor.UnlockCursor();
 
 			await scene.LoadSceneAsync(SceneNames.Hub, ApplicationCancellationToken);
-
+			
+			var playerFactory = new PlayerFactory(_serviceLocator);
+			var networkConnectionController = new NetworkConnectionController();
 			var networkControllers = new IBaseController[]
 			{
-				new NetworkPlayerSpawnController(_serviceLocator, _lifecycle),
+				networkConnectionController,
+				new NetworkPlayerSpawnController(network, networkConnectionController, objectFactory, playerFactory, _lifecycle),
 			};
 
 			foreach (var controller in networkControllers)

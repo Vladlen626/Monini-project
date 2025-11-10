@@ -51,49 +51,10 @@ namespace _Main.Scripts.Player
 
 		public void OnUpdate(float deltaTime)
 		{
-			if (!_bridge)
-			{
-				_bridge = _playerView.GetComponent<PlayerNetworkBridge>();
-			}
-
-			if (_bridge.IsOwner)
-			{
-				var inputData = CollectInput();
-
-				if (_bridge.IsServer)
-				{
-					_bridge.SetCachedInput(inputData);
-				}
-				else
-				{
-					_bridge.SendInputServerRpc(inputData);
-					HandleMovement(deltaTime, inputData);
-				}
-			}
-
-			// Сервер (включая хост): считает авторитетно один раз
-			if (_bridge.IsServer)
-			{
-				HandleMovement(deltaTime, _bridge.CachedInput);
-			}
+			HandleMovement(deltaTime);
 		}
-
-		private PlayerInputData CollectInput()
-		{
-			if (_inputService == null)
-			{
-				return default;
-			}
-
-			return new PlayerInputData
-			{
-				Move = _inputService.Move,
-				IsJumping = _inputService.IsJumping,
-				IsSprinting = _inputService.IsSprinting
-			};
-		}
-
-		private void HandleMovement(float dt, in PlayerInputData inputData)
+		
+		private void HandleMovement(float dt)
 		{
 			// === Grounded / Coyote ===
 			_isGrounded = _playerView.IsGrounded;
@@ -112,14 +73,14 @@ namespace _Main.Scripts.Player
 			}
 
 			// === Jump buffer ===
-			bool jumpHeld = inputData.IsJumping;
+			bool jumpHeld = _inputService.IsJumping;
 			bool jumpPressedThisFrame = jumpHeld && !_prevJumpHeld;
 			_prevJumpHeld = jumpHeld;
 			if (jumpPressedThisFrame) _jumpBufferTimer = _playerConfig.jumpBuffer;
 			else _jumpBufferTimer = Mathf.Max(0f, _jumpBufferTimer - dt);
 
 			// === Ввод и базовое желаемое направление (камеро-ориентированное) ===
-			Vector2 in2 = inputData.Move;
+			Vector2 in2 = _inputService.Move;
 
 			_cameraForward.y = 0f;
 			float forwardMag = _cameraForward.sqrMagnitude;
@@ -160,7 +121,7 @@ namespace _Main.Scripts.Player
 			}
 
 			// === Целевая скорость ===
-			float maxSpeed = inputData.IsSprinting ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
+			float maxSpeed = _inputService.IsSprinting ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
 			_targetVelXZ.x = _desiredDirection.x * maxSpeed;
 			_targetVelXZ.y = 0f;
 			_targetVelXZ.z = _desiredDirection.z * maxSpeed;
@@ -249,7 +210,6 @@ namespace _Main.Scripts.Player
 			float speed01 = Mathf.Clamp01(_velXZ.magnitude / Mathf.Max(0.01f, maxSpeed));
 			float rotSpeed = Mathf.Lerp(_playerConfig.minRotateSpeed, _playerConfig.maxRotateSpeed, speed01);
 			_playerView.SetRotateSpeed(rotSpeed);
-			Debug.Log($"MOVE_CALL: server={_bridge.IsServer}, owner={_bridge.IsOwner}, y={_verticalY}");
 			_playerView.ApplyMovement(_velocity);
 		}
 
