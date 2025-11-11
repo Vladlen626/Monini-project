@@ -72,6 +72,7 @@ namespace _Main.Scripts.Player
 			_view.OnLand += OnLand;
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public void OnUpdate(float dt)
 		{
 			if (_cooldown > 0f) _cooldown -= dt;
@@ -114,6 +115,7 @@ namespace _Main.Scripts.Player
 			_shake?.ShakeAsync(0.35f, 0.08f).Forget();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private void OnLand()
 		{
 			if (!_awaitLand) return;

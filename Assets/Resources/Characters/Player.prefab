@@ -72,6 +72,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 3795180661037340045}
   _networkObjectCache: {fileID: 3795180661037340045}
+  _slamFx: {fileID: 3432958286849152088, guid: 52b6a646c7d29e043887a33fc4a66136, type: 3}
 --- !u!143 &6674581506054378922
 CharacterController:
   m_ObjectHideFlags: 0

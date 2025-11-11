@@ -11,8 +11,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerView))]
 public class PlayerNetworkBridge : NetworkBehaviour
 {
-	private PlayerView _view;
+	[SerializeField] private GameObject _slamFx;
 	
+	private PlayerView _view;
 	private INetworkService _network;
 
 	private void Awake()
@@ -60,6 +61,6 @@ public class PlayerNetworkBridge : NetworkBehaviour
 	[ObserversRpc]
 	private void Rpc_PlaySlamFX(Vector3 pos)
 	{
-		Debug.Log("Slam impact FX");
+		Instantiate(_slamFx, pos, Quaternion.Euler(-90, 0, 0));
 	}
 }
