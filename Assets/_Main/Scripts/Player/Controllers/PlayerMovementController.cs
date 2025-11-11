@@ -47,13 +47,36 @@ namespace _Main.Scripts.Player
 			_inputService = inputService;
 			_playerConfig = playerConfig;
 			_playerView = playerView;
+			_bridge = playerView.GetComponent<PlayerNetworkBridge>();
 		}
 
 		public void OnUpdate(float deltaTime)
 		{
+			if (!_bridge.IsOwner)
+			{
+				return;
+			}
+
 			HandleMovement(deltaTime);
 		}
-		
+
+		public void RequestVerticalOverride(float y)
+		{
+			_hasPendingVerticalOverride = true;
+			_pendingVerticalY = y; // заменить вертикальную скорость в ЭТОМ кадре
+		}
+
+		public void AddImpulseXZ(Vector3 impulse)
+		{
+			_pendingImpulseXZ.x += impulse.x;
+			_pendingImpulseXZ.z += impulse.z;
+		}
+
+		public void SuppressJumpFor(float duration)
+		{
+			if (duration > _suppressJumpTimer) _suppressJumpTimer = duration;
+		}
+
 		private void HandleMovement(float dt)
 		{
 			// === Grounded / Coyote ===

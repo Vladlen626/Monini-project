@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
@@ -10,13 +11,13 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerView))]
 public class PlayerNetworkBridge : NetworkBehaviour
 {
-	public PlayerView playerView => _playerView;
-	private PlayerView _playerView;
+	private PlayerView _view;
+	
 	private INetworkService _network;
 
-	public void Initialize(PlayerView inPlayerView)
+	private void Awake()
 	{
-		_playerView = inPlayerView;
+		_view = GetComponent<PlayerView>();
 	}
 
 	public override async void OnStartClient()
@@ -27,13 +28,13 @@ public class PlayerNetworkBridge : NetworkBehaviour
 		{
 			return;
 		}
-		
-		var locator = Locator._current;
-		var objectFactory = locator.Get<IObjectFactory>();
-		var playerFactory = new PlayerFactory(locator);
-		var lifecycle = locator.Get<LifecycleManager>();
 
-		var ctx = await PlayerContext.Client.CreateAsync(playerView, objectFactory, playerFactory,
+		var objectFactory = Locator.Resolve<IObjectFactory>();
+		var lifecycle = Locator.Resolve<LifecycleService>();
+
+		var playerFactory = new PlayerFactory();
+
+		var ctx = await PlayerContext.Client.CreateAsync(_view, objectFactory, playerFactory,
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);
@@ -42,5 +43,23 @@ public class PlayerNetworkBridge : NetworkBehaviour
 		{
 			await lifecycle.RegisterAsync(c);
 		}
+	}
+	
+	[ServerRpc]
+	public void Server_NotifySlamImpact(Vector3 pos, float radius)
+	{
+		Collider[] hits = Physics.OverlapSphere(pos, radius, LayerMask.GetMask($"Destructible"));
+		foreach (var c in hits)
+		{
+			if (c.TryGetComponent<ISlamImpactReceiver>(out var r))
+				r.OnSlamImpact(new ImpactCtx { Position = pos, Radius = radius });
+		}
+		Rpc_PlaySlamFX(pos);
+	}
+
+	[ObserversRpc]
+	private void Rpc_PlaySlamFX(Vector3 pos)
+	{
+		Debug.Log("Slam impact FX");
 	}
 }

@@ -13,9 +13,9 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 {
 	private readonly INetworkService _networkService;
 	private readonly INetworkConnectionEvents _connection;
-	private readonly IObjectFactory _objectFactory;
+	private readonly INetworkObjectFactory _objectFactory;
 	private readonly PlayerFactory _playerFactory;
-	private readonly LifecycleManager _lifecycle;
+	private readonly LifecycleService _lifecycle;
 
 	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
 
@@ -24,11 +24,11 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		INetworkConnectionEvents connectionEvents,
 		IObjectFactory objectFactory,
 		PlayerFactory playerFactory,
-		LifecycleManager lifecycle)
+		LifecycleService lifecycle)
 	{
 		_networkService = networkService;
 		_connection = connectionEvents;
-		_objectFactory = objectFactory;
+		_objectFactory = objectFactory as INetworkObjectFactory;
 		_playerFactory = playerFactory;
 		_lifecycle = lifecycle;
 	}
@@ -102,19 +102,13 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		var playerView = await _playerFactory.CreatePlayerView(Vector3.zero);
-		var bridge = playerView.GetComponent<PlayerNetworkBridge>();
-		bridge.Initialize(playerView);
-		
-		var nob = bridge.GetComponent<NetworkObject>();
 		var connection = _networkService.GetClientConnection(clientId);
-		nob.Spawn(nob);
-		await UniTask.WaitUntil(() => nob.NetworkManager != null && nob.IsSpawned);
-		await UniTask.Yield(); 
-		nob.GiveOwnership(connection);
+		var nob = await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
+			Vector3.zero, Quaternion.identity, connection);
+		var bridge = nob.GetComponent<PlayerView>();
 
 		var ctx = await PlayerContext.Server.CreateAsync(
-			playerView, _objectFactory, _playerFactory, CancellationToken.None);
+			bridge, _playerFactory, CancellationToken.None);
 
 		foreach (var c in ctx.Controllers)
 		{

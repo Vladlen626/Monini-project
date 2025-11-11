@@ -12,32 +12,18 @@ namespace _Main.Scripts.Player
 {
 	public class PlayerFactory
 	{
-		private readonly ServiceLocator _serviceLocator;
-
-		public PlayerFactory(ServiceLocator serviceLocator)
-		{
-			_serviceLocator = serviceLocator;
-		}
-
-		public async UniTask<PlayerView> CreatePlayerView(Vector3 spawnPosition)
-		{
-			var objectFactory = _serviceLocator.Get<IObjectFactory>();
-
-			var playerView = await objectFactory.CreateAsync<PlayerView>(ResourcePaths.Characters.Player,
-				spawnPosition, Quaternion.identity);
-
-			return playerView;
-		}
-
 		public IBaseController[] GetPlayerBaseControllers(
 			PlayerConfig cfg,
 			PlayerView view,
 			IInputService input,
 			ICameraService camera)
 		{
+			var movementController = new PlayerMovementController(input, cfg, view, camera.GetCameraTransform());
+			
 			return new IBaseController[]
 			{
-				new PlayerMovementController(input, cfg, view, camera.GetCameraTransform()),
+				movementController,
+				new PlayerSlamBounceController(input, movementController, view, camera, cfg),
 				new PlayerCameraController(camera, input, view),
 				new PlayerAnimationController(input, cfg, view),
 			};
@@ -49,7 +35,6 @@ namespace _Main.Scripts.Player
 		{
 			return new IBaseController[]
 			{
-				new PlayerMovementController(null, cfg, view, null)
 			};
 		}
 	}

@@ -17,10 +17,10 @@ namespace _Main.Scripts.Core
 		protected override void RegisterServices(GameContext context)
 		{
 			Debug.Log("[GameRoot] Register services...");
-
+			
+			//Global
 			var logger = new LoggerService();
 			var resourcesService = new ResourceService(logger);
-			var objectFactory = new ObjectFactory(resourcesService, logger);
 			var audioService = new AudioBaseService(logger);
 			var uiService = new UIBaseService(logger, resourcesService, context.StaticCanvas, context.DynamicCanvas);
 			var cursorService = new CursorService(uiService);
@@ -29,6 +29,9 @@ namespace _Main.Scripts.Core
 
 			//Network
 			var networkService = new NetworkService();
+			
+			//NetworkDepended
+			var objectFactory = new ObjectFactory(resourcesService, logger, networkService);
 
 			//Register
 			_serviceLocator.Register<ILoggerService, LoggerService>(logger);
@@ -60,7 +63,7 @@ namespace _Main.Scripts.Core
 
 			await scene.LoadSceneAsync(SceneNames.Hub, ApplicationCancellationToken);
 			
-			var playerFactory = new PlayerFactory(_serviceLocator);
+			var playerFactory = new PlayerFactory();
 			var networkConnectionController = new NetworkConnectionController();
 			var networkControllers = new IBaseController[]
 			{

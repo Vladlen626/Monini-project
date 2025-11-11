@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 
 namespace PlatformCore.Infrastructure.Lifecycle
 {
-	public class LifecycleManager : IDisposable
+	public class LifecycleService : IService
 	{
 		private readonly List<object> _managedObjects = new List<object>();
 		private readonly List<IUpdatable> _updatables = new List<IUpdatable>();

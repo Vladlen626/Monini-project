@@ -2,7 +2,7 @@
 {
 	public static class Locator
 	{
-		public static ServiceLocator _current;
+		private static ServiceLocator _current;
 
 		public static void Set(ServiceLocator locator)
 		{

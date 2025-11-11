@@ -12,7 +12,7 @@ namespace PlatformCore.Core
 		public ServiceLocator EditorServices => _serviceLocator;
 #endif
 		protected ServiceLocator _serviceLocator { get; private set; }
-		protected LifecycleManager _lifecycle { get; private set; }
+		protected LifecycleService _lifecycle { get; private set; }
 
 		private readonly ApplicationLifetimeService _lifetimeService;
 		protected CancellationToken ApplicationCancellationToken => _lifetimeService.ApplicationLifetime;
@@ -21,7 +21,8 @@ namespace PlatformCore.Core
 		{
 			_serviceLocator = new ServiceLocator();
 			Locator.Set(_serviceLocator);
-			_lifecycle = new LifecycleManager();
+			_lifecycle = new LifecycleService();
+			_serviceLocator.Register<LifecycleService, LifecycleService>(_lifecycle);
 			_lifetimeService = new ApplicationLifetimeService();
 		}
 

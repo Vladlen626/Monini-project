@@ -1,6 +1,7 @@
 ﻿using System;
 using FishNet.Connection;
 using FishNet.Managing;
+using FishNet.Object;
 
 namespace _Main.Scripts.Core
 {
@@ -13,6 +14,8 @@ namespace _Main.Scripts.Core
 		void StartHost();
 		void StartClient();
 		void Stop();
+		void Spawn(NetworkObject nob, NetworkConnection conn);
+		void Despawn(NetworkObject nob);
 		NetworkConnection GetClientConnection(int clientId);
 	}
 }

@@ -85,7 +85,7 @@ public abstract class PlayerContext : IDisposable
 		}
 
 		public static async UniTask<Server> CreateAsync(
-			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
+			PlayerView view, PlayerFactory playerFactory, CancellationToken ct)
 		{
 			var ctx = new Server
 			{
@@ -93,6 +93,8 @@ public abstract class PlayerContext : IDisposable
 				Config = new PlayerConfig()
 			};
 			
+			
+			//Позде будут добавлены контроллеры, сейчас пустой
 			ctx.Controllers.AddRange(
 				playerFactory.GetServerControllers(ctx.Config, view)
 			);

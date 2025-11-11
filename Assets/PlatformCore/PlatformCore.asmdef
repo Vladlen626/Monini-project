@@ -8,6 +8,7 @@
     "Unity.Cinemachine",
     "UnitySplines",
     "DOTween.Modules",
-    "Unity.Netcode.Runtime"
+    "Unity.Netcode.Runtime",
+    "FishNet.Runtime"
   ]
 }

@@ -2,6 +2,7 @@
 using FishNet;
 using FishNet.Connection;
 using FishNet.Managing;
+using FishNet.Object;
 using FishNet.Transporting;
 using PlatformCore.Core;
 using Object = UnityEngine.Object;
@@ -51,6 +52,16 @@ namespace _Main.Scripts.Core
 			{
 				_networkManager.ServerManager.StopConnection(true);
 			}
+		}
+
+		public void Spawn(NetworkObject nob, NetworkConnection conn)
+		{
+			_networkManager.ServerManager.Spawn(nob, conn);
+		}
+		
+		public void Despawn(NetworkObject nob)
+		{
+			_networkManager.ServerManager.Despawn(nob);
 		}
 
 		public void Dispose()
