@@ -13,7 +13,7 @@ namespace _Main.Scripts.Player
 		private readonly IInputService _inputService;
 		private readonly IAudioService _audioService;
 		private readonly PlayerConfig _playerConfig;
-		private readonly PlayerView _playerView;
+		private readonly global::PlayerView _playerView;
 		private readonly Transform _cameraTransform;
 
 		private bool _isGrounded;
@@ -40,7 +40,7 @@ namespace _Main.Scripts.Player
 		//network
 		private PlayerNetworkBridge _bridge;
 
-		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, PlayerView playerView,
+		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, global::PlayerView playerView,
 			Transform cameraTransform)
 		{
 			_cameraTransform = cameraTransform;

@@ -11,7 +11,7 @@ using PlatformCore.Services.Factory;
 public abstract class PlayerContext : IDisposable
 {
 	public PlayerView View { get; protected set; }
-	public PlayerConfig Config { get; protected set; }
+	public PlayerModel Model { get; protected set; }
 	public List<IBaseController> Controllers { get; protected set; } = new();
 
 	protected readonly List<IPlayerLocalService> _locals = new();
@@ -27,9 +27,6 @@ public abstract class PlayerContext : IDisposable
 		_locals.Clear();
 	}
 
-	// ─────────────────────────────────────────────────────────────
-	// CLIENT CONTEXT
-	// ─────────────────────────────────────────────────────────────
 	public sealed class Client : PlayerContext
 	{
 		public IInputService Input { get; private set; }
@@ -45,7 +42,7 @@ public abstract class PlayerContext : IDisposable
 			var ctx = new Client
 			{
 				View = view,
-				Config = new PlayerConfig()
+				Model = new PlayerModel()
 			};
 
 			var input = new InputLocalService();
@@ -59,9 +56,9 @@ public abstract class PlayerContext : IDisposable
 
 			ctx.Input = input;
 			ctx.Camera = camera;
-			
+
 			ctx.Controllers.AddRange(
-				playerFactory.GetPlayerBaseControllers(ctx.Config, view, input, camera)
+				playerFactory.GetPlayerBaseControllers(ctx.Model, view, input, camera)
 			);
 
 			return ctx;
@@ -75,9 +72,6 @@ public abstract class PlayerContext : IDisposable
 		}
 	}
 
-	// ─────────────────────────────────────────────────────────────
-	// SERVER CONTEXT
-	// ─────────────────────────────────────────────────────────────
 	public sealed class Server : PlayerContext
 	{
 		private Server()
@@ -90,13 +84,13 @@ public abstract class PlayerContext : IDisposable
 			var ctx = new Server
 			{
 				View = view,
-				Config = new PlayerConfig()
+				Model = new PlayerModel()
 			};
-			
-			
+
+
 			//Позде будут добавлены контроллеры, сейчас пустой
 			ctx.Controllers.AddRange(
-				playerFactory.GetServerControllers(ctx.Config, view)
+				playerFactory.GetServerControllers(ctx.Model, view)
 			);
 
 			return ctx;

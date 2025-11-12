@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerView : MonoBehaviour
@@ -11,12 +10,11 @@ public class PlayerView : MonoBehaviour
 	[SerializeField] private float _rotateSpeedDeg = 720f;
 	[SerializeField] private Animator _animator;
 	[SerializeField] private PlayerNetworkBridge _bridge;
+	[SerializeField] private Collider _slamTrigger;
 	public bool IsGrounded => _characterController.isGrounded;
 	public Vector3 Position => transform.position;
 	public Transform CameraRoot => _cameraRoot;
 	public Vector3 Velocity => _characterController.velocity;
-	public Transform PlayerTransform => _playerTransform;
-	public CharacterController Controller => _characterController;
 	public Animator Animator => _animator;
 	public event Action OnLand;
 
@@ -27,6 +25,7 @@ public class PlayerView : MonoBehaviour
 		DetectLanding();
 	}
 
+	// ReSharper disable Unity.PerformanceAnalysis
 	private void DetectLanding()
 	{
 		if (!_wasGrounded && IsGrounded)
@@ -50,6 +49,16 @@ public class PlayerView : MonoBehaviour
 		}
 	}
 
+	public void EnableSlamTrigger()
+	{
+		_slamTrigger.enabled = true;
+	}
+
+	public void DisableSlamTrigger()
+	{
+		_slamTrigger.enabled = false;
+	}
+
 	public void SetRotateSpeed(float degPerSec)
 	{
 		_rotateSpeedDeg = degPerSec;
@@ -59,7 +68,7 @@ public class PlayerView : MonoBehaviour
 	{
 		if (_bridge.IsOwner)
 		{
-			_bridge.Server_NotifySlamImpact(Position, radius);
+			_bridge.Rpc_PlaySlamFX(Position);
 		}
 	}
 }

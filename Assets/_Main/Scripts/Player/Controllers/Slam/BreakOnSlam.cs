@@ -16,13 +16,12 @@ public class BreakOnSlam : NetworkBehaviour, ISlamImpactReceiver
 		boxCollider = gameObject.GetComponent<Collider>();
 	}
 
-	public void OnSlamImpact(in ImpactCtx ctx)
+	public void OnSlamImpact()
 	{
 		if (ServerManager.Started)
 		{
 			Destruct();
 		}
-			
 	}
 
 	private void Destruct()

@@ -10,7 +10,7 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 	{
 		private readonly IInputService _input;
 		private readonly PlayerConfig _config;
-		private readonly PlayerView _view;
+		private readonly global::PlayerView _view;
 		private readonly Animator _anim;
 
 		// Animator hashes
@@ -28,7 +28,7 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 		private const float SpeedDamp = 0.1f;
 		private const float YVelDamp = 0.1f;
 
-		public PlayerAnimationController(IInputService input, PlayerConfig config, PlayerView view)
+		public PlayerAnimationController(IInputService input, PlayerConfig config, global::PlayerView view)
 		{
 			_input = input;
 			_config = config;

@@ -12,10 +12,10 @@ namespace _Main.Scripts.Player
 	{
 		private readonly IInputService _inputService;
 		private readonly ICursorService _cursorService;
-		private readonly PlayerView _playerView;
+		private readonly global::PlayerView _playerView;
 		private readonly ICameraShakeService _cameraShakeService;
 
-		public PlayerCameraController(ICameraService cameraService, IInputService inputService, PlayerView playerView)
+		public PlayerCameraController(ICameraService cameraService, IInputService inputService, global::PlayerView playerView)
 		{
 			_inputService = inputService;
 			_cameraShakeService = cameraService;

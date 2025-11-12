@@ -12,13 +12,20 @@ using UnityEngine;
 public class PlayerNetworkBridge : NetworkBehaviour
 {
 	[SerializeField] private GameObject _slamFx;
-	
+	[SerializeField] private SlamTrigger _slamTrigger;
+
 	private PlayerView _view;
 	private INetworkService _network;
 
 	private void Awake()
 	{
 		_view = GetComponent<PlayerView>();
+		_slamTrigger.OnSlamImpactReceived += Server_NotifyObjectGetSlamImpact;
+	}
+
+	private void OnDestroy()
+	{
+		_slamTrigger.OnSlamImpactReceived -= Server_NotifyObjectGetSlamImpact;
 	}
 
 	public override async void OnStartClient()
@@ -45,21 +52,25 @@ public class PlayerNetworkBridge : NetworkBehaviour
 			await lifecycle.RegisterAsync(c);
 		}
 	}
-	
+
 	[ServerRpc]
-	public void Server_NotifySlamImpact(Vector3 pos, float radius)
+	private void Server_NotifyObjectGetSlamImpact(NetworkObject target)
 	{
-		Collider[] hits = Physics.OverlapSphere(pos, radius, LayerMask.GetMask($"Destructible"));
-		foreach (var c in hits)
+		if (!IsOwner)
 		{
-			if (c.TryGetComponent<ISlamImpactReceiver>(out var r))
-				r.OnSlamImpact(new ImpactCtx { Position = pos, Radius = radius });
+			return;
 		}
-		Rpc_PlaySlamFX(pos);
+
+		var slamReceiver = target.GetComponent<ISlamImpactReceiver>();
+		if (slamReceiver != null)
+		{
+			slamReceiver.OnSlamImpact();
+		}
 	}
 
+
 	[ObserversRpc]
-	private void Rpc_PlaySlamFX(Vector3 pos)
+	public void Rpc_PlaySlamFX(Vector3 pos)
 	{
 		Instantiate(_slamFx, pos, Quaternion.Euler(-90, 0, 0));
 	}
