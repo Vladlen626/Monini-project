@@ -103,18 +103,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		}
 
 		var connection = _networkService.GetClientConnection(clientId);
-		var nob = await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
+		await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
 			Vector3.zero, Quaternion.identity, connection);
-		var bridge = nob.GetComponent<PlayerView>();
-
-		var ctx = await PlayerContext.Server.CreateAsync(
-			bridge, _playerFactory, CancellationToken.None);
-
-		foreach (var c in ctx.Controllers)
-		{
-			await _lifecycle.RegisterAsync(c);
-		}
-
-		_ownerContexts[clientId] = ctx;
 	}
 }

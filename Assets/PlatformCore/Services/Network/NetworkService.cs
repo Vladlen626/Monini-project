@@ -30,6 +30,11 @@ namespace _Main.Scripts.Core
 			return _networkManager.ServerManager.Clients[clientId];
 		}
 		
+		public bool TryGetSpawnedNetworkObject(int objectId, out NetworkObject networkObject)
+		{
+			return _networkManager.ServerManager.Objects.Spawned.TryGetValue(objectId, out networkObject);
+		}
+		
 		public void StartHost()
 		{
 			_networkManager.ServerManager.StartConnection();

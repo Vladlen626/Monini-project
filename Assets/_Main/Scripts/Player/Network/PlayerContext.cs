@@ -15,8 +15,7 @@ public abstract class PlayerContext : IDisposable
 	public List<IBaseController> Controllers { get; protected set; } = new();
 
 	protected readonly List<IPlayerLocalService> _locals = new();
-
-	// ReSharper disable Unity.PerformanceAnalysis
+	
 	public virtual void Dispose()
 	{
 		foreach (var s in _locals)
@@ -69,31 +68,6 @@ public abstract class PlayerContext : IDisposable
 			base.Dispose();
 			Input = null;
 			Camera = null;
-		}
-	}
-
-	public sealed class Server : PlayerContext
-	{
-		private Server()
-		{
-		}
-
-		public static async UniTask<Server> CreateAsync(
-			PlayerView view, PlayerFactory playerFactory, CancellationToken ct)
-		{
-			var ctx = new Server
-			{
-				View = view,
-				Model = new PlayerModel()
-			};
-
-
-			//Позде будут добавлены контроллеры, сейчас пустой
-			ctx.Controllers.AddRange(
-				playerFactory.GetServerControllers(ctx.Model, view)
-			);
-
-			return ctx;
 		}
 	}
 }

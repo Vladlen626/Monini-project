@@ -1,4 +1,6 @@
-﻿public interface ISlamImpactReceiver
+﻿using System;
+
+public interface ISlamImpactReceiver
 {
 	void OnSlamImpact();
 }

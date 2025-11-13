@@ -122,7 +122,7 @@ namespace _Main.Scripts.Player
 			_shake?.ShakeAsync(_cfg.ShakeAmp * 0.6f, _cfg.ShakeDur * 0.5f).Forget();
 
 			DoAreaImpact();
-			_model.SetState(PlayerState.Normal);
+
 			float maxJumpVy = Mathf.Sqrt(_model.config.jumpHeight * -2f * _model.config.gravity) * 1.1f;
 			_movement.SuppressJumpFor(_cfg.SuppressJumpTime);
 			_movement.RequestVerticalOverride(maxJumpVy);
@@ -131,13 +131,15 @@ namespace _Main.Scripts.Player
 			fwd.y = 0f;
 			fwd.Normalize();
 			_movement.AddImpulseXZ(fwd * _cfg.ForwardBoost);
-
 			_cooldown = _cfg.AfterImpactCooldown;
+
+			await UniTask.Yield(PlayerLoopTiming.FixedUpdate);
+			_model.SetState(PlayerState.Normal);
 		}
 
 		private void DoAreaImpact()
 		{
-			_view.NotifySlamImpact(_cfg.ImpactRadius);
+			_view.NotifySlamImpact();
 		}
 	}
 }

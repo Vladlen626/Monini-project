@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
+using FishNet.Connection;
 using FishNet.Object;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
@@ -9,23 +10,22 @@ using PlatformCore.Services.Factory;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerView))]
-public class PlayerNetworkBridge : NetworkBehaviour
+public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 {
 	[SerializeField] private GameObject _slamFx;
 	[SerializeField] private SlamTrigger _slamTrigger;
 
 	private PlayerView _view;
-	private INetworkService _network;
 
 	private void Awake()
 	{
 		_view = GetComponent<PlayerView>();
-		_slamTrigger.OnSlamImpactReceived += Server_NotifyObjectGetSlamImpact;
+		_slamTrigger.OnSlamImpactReceived += OnSlamImpactHandler;
 	}
 
 	private void OnDestroy()
 	{
-		_slamTrigger.OnSlamImpactReceived -= Server_NotifyObjectGetSlamImpact;
+		_slamTrigger.OnSlamImpactReceived -= OnSlamImpactHandler;
 	}
 
 	public override async void OnStartClient()
@@ -46,6 +46,7 @@ public class PlayerNetworkBridge : NetworkBehaviour
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);
+		_slamTrigger.SetPlayerModel(ctx.Model);
 
 		foreach (var c in ctx.Controllers)
 		{
@@ -53,21 +54,48 @@ public class PlayerNetworkBridge : NetworkBehaviour
 		}
 	}
 
-	[ServerRpc]
-	private void Server_NotifyObjectGetSlamImpact(NetworkObject target)
+	private void OnSlamImpactHandler(int targetId)
 	{
 		if (!IsOwner)
 		{
 			return;
 		}
 
-		var slamReceiver = target.GetComponent<ISlamImpactReceiver>();
+		Server_NotifyObjectGetSlamImpact( targetId);
+	}
+	
+	[Server]
+	public void OnSlamImpact()
+	{
+		Target_ApplyFlat(Owner);
+	}
+
+	[TargetRpc]
+	private void Target_ApplyFlat(NetworkConnection target)
+	{
+		_view.OnSlamImpact();
+	}
+
+	[ServerRpc]
+	private void Server_NotifyObjectGetSlamImpact(int targetId)
+	{
+		if (!NetworkManager.ServerManager.Objects.Spawned.TryGetValue(targetId, out var networkObject))
+		{
+			return;
+		}
+		
+		var slamReceiver = networkObject.GetComponent<ISlamImpactReceiver>();
 		if (slamReceiver != null)
 		{
 			slamReceiver.OnSlamImpact();
 		}
 	}
 
+	[ServerRpc(RequireOwnership = true)]
+	public void Server_PlaySlamFX(Vector3 pos)
+	{
+		Rpc_PlaySlamFX(pos);
+	}
 
 	[ObserversRpc]
 	public void Rpc_PlaySlamFX(Vector3 pos)

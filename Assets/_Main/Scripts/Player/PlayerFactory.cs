@@ -1,13 +1,9 @@
 ﻿using _Main.Scripts.CameraFX._Main.Scripts.Player;
 using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player.Controllers;
-using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Services;
-using PlatformCore.Services.Audio;
-using PlatformCore.Services.Factory;
 using UnityEngine;
-using IObjectFactory = PlatformCore.Services.Factory.IObjectFactory;
 
 namespace _Main.Scripts.Player
 {
@@ -20,26 +16,18 @@ namespace _Main.Scripts.Player
 			ICameraService camera)
 		{
 			var movementController =
-				new PlayerMovementController(input, model.config, view, camera.GetCameraTransform());
+				new PlayerMovementController(input, model.config, view, camera.GetCameraTransform(), model);
 			var charController = view.GetComponent<CharacterController>();
-			
+			var stateMachine = new PlayerStateMachine(model, view, charController);
 			
 			return new IBaseController[]
 			{
-				new PlayerStateController(model, view, charController),
 				movementController,
+				new PlayerStateController(model, stateMachine),
+				new PlayerFlatController(model, view),
 				new PlayerSlamBounceController(input, movementController, view, camera, model),
 				new PlayerCameraController(camera, input, view),
 				new PlayerAnimationController(input, model.config, view),
-			};
-		}
-
-		public IBaseController[] GetServerControllers(
-			PlayerModel model,
-			PlayerView view)
-		{
-			return new IBaseController[]
-			{
 			};
 		}
 	}

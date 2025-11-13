@@ -1,59 +1,35 @@
-﻿using PlatformCore.Core;
+﻿using _Main.Scripts.Player.StateMachine.States;
+using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using UnityEngine;
 
 namespace _Main.Scripts.Player.Controllers
 {
-	//TODO: Позднее заменить на полноценную state machine с стеком состояний
-	// У каждого стейта будет выход и вход, они сами будут подчищать за собой
 	public class PlayerStateController : IBaseController, IActivatable
 	{
-		private readonly PlayerModel _playerModel;
-		private readonly PlayerView _playerView;
-		private readonly CharacterController _characterController;
+		private readonly PlayerModel _model;
+		private readonly PlayerStateMachine _machine;
 
-		public PlayerStateController(PlayerModel playerModel, PlayerView playerView,
-			CharacterController characterController)
+		public PlayerStateController(PlayerModel model, PlayerStateMachine machine)
 		{
-			_playerModel = playerModel;
-			_playerView = playerView;
-			_characterController = characterController;
+			_model = model;
+			_machine = machine;
 		}
 
 		public void Activate()
 		{
-			_playerModel.OnPlayerStateChanged += OnPlayerStateChangedHandler;
-			OnPlayerStateChangedHandler(_playerModel.State);
+			_model.OnPlayerStateChanged += OnStateChanged;
+			OnStateChanged(_model.State);
 		}
 
 		public void Deactivate()
 		{
-			_playerModel.OnPlayerStateChanged -= OnPlayerStateChangedHandler;
+			_model.OnPlayerStateChanged -= OnStateChanged;
 		}
 
-		private void OnPlayerStateChangedHandler(PlayerState state)
+		private void OnStateChanged(PlayerState state)
 		{
-			switch (state)
-			{
-				case PlayerState.Normal:
-					SetupNormalState();
-					break;
-				case PlayerState.Slam:
-					SetupSlamState();
-					break;
-			}
+			_machine.HandleStateChange(state);
 		}
-
-		private void SetupNormalState()
-		{
-			_playerView.DisableSlamTrigger();
-			_characterController.excludeLayers = LayerMask.GetMask();
-		}
-
-		private void SetupSlamState()
-		{
-			_playerView.EnableSlamTrigger();
-			_characterController.excludeLayers = LayerMask.GetMask("Destructible");
-		}
-}
+	}
 }

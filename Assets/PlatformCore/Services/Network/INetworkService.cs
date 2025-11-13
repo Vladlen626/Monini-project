@@ -17,5 +17,6 @@ namespace _Main.Scripts.Core
 		void Spawn(NetworkObject nob, NetworkConnection conn);
 		void Despawn(NetworkObject nob);
 		NetworkConnection GetClientConnection(int clientId);
+		bool TryGetSpawnedNetworkObject(int objectId, out NetworkObject networkObject);
 	}
 }

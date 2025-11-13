@@ -13,7 +13,8 @@ namespace _Main.Scripts.Player
 		private readonly IInputService _inputService;
 		private readonly IAudioService _audioService;
 		private readonly PlayerConfig _playerConfig;
-		private readonly global::PlayerView _playerView;
+		private readonly PlayerView _playerView;
+		private readonly PlayerModel _playerModel;
 		private readonly Transform _cameraTransform;
 
 		private bool _isGrounded;
@@ -40,19 +41,25 @@ namespace _Main.Scripts.Player
 		//network
 		private PlayerNetworkBridge _bridge;
 
-		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, global::PlayerView playerView,
-			Transform cameraTransform)
+		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, PlayerView playerView,
+			Transform cameraTransform, PlayerModel playerModel)
 		{
 			_cameraTransform = cameraTransform;
 			_inputService = inputService;
 			_playerConfig = playerConfig;
 			_playerView = playerView;
+			_playerModel = playerModel;
 			_bridge = playerView.GetComponent<PlayerNetworkBridge>();
 		}
 
 		public void OnUpdate(float deltaTime)
 		{
 			if (!_bridge.IsOwner)
+			{
+				return;
+			}
+
+			if (_playerModel.State == PlayerState.Flat)
 			{
 				return;
 			}
@@ -137,7 +144,7 @@ namespace _Main.Scripts.Player
 				desiredSqr = 1f;
 			}
 
-			if (_isGrounded || NearGround(out _groundNormal))
+			if (_isGrounded)
 			{
 				ProjectOnPlaneNormalized(ref _desiredDirection, _groundNormal);
 				desiredSqr = _desiredDirection.sqrMagnitude;
@@ -234,25 +241,6 @@ namespace _Main.Scripts.Player
 			float rotSpeed = Mathf.Lerp(_playerConfig.minRotateSpeed, _playerConfig.maxRotateSpeed, speed01);
 			_playerView.SetRotateSpeed(rotSpeed);
 			_playerView.ApplyMovement(_velocity);
-		}
-
-		private bool NearGround(out Vector3 normal)
-		{
-			normal = Vector3.up;
-			Vector3 origin = _playerView.Position;
-			origin.y += 0.1f;
-			int hits = Physics.SphereCastNonAlloc(origin, 0.05f, Vector3.down, _groundHits,
-				_playerConfig.groundSnapDistance, ~0, QueryTriggerInteraction.Ignore);
-			if (hits <= 0)
-				return false;
-
-			var hit = _groundHits[0];
-			float slope = Vector3.Angle(hit.normal, Vector3.up);
-			if (slope > _playerConfig.maxSnapSlope)
-				return false;
-
-			normal = hit.normal;
-			return true;
 		}
 
 		private static void ProjectOnPlaneNormalized(ref Vector3 vector, Vector3 planeNormal)

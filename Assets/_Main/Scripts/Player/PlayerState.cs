@@ -3,6 +3,7 @@
 	public enum PlayerState
 	{
 		Normal,
-		Slam
+		Slam,
+		Flat,
 	}
 }
