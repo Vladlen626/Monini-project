@@ -19,6 +19,7 @@ namespace _Main.Scripts.Core
 		public bool IsHost => IsServer && IsClient;
 
 		public int LocalClientId => _networkManager.ClientManager.Connection.ClientId;
+		public int PlayersCount =>  _networkManager.ServerManager.Clients.Count;
 
 		public NetworkService()
 		{

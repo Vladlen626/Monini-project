@@ -27,7 +27,7 @@ namespace _Main.Scripts.Player
 				new PlayerFlatController(model, view),
 				new PlayerSlamBounceController(input, movementController, view, camera, model),
 				new PlayerCameraController(camera, input, view),
-				new PlayerAnimationController(input, model.config, view),
+				new PlayerAnimationController(input, model.config, view, model),
 			};
 		}
 	}

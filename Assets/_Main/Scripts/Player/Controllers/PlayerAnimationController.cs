@@ -10,8 +10,9 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 	{
 		private readonly IInputService _input;
 		private readonly PlayerConfig _config;
-		private readonly global::PlayerView _view;
+		private readonly PlayerView _view;
 		private readonly Animator _anim;
+		private readonly PlayerModel _playerModel;
 
 		// Animator hashes
 		private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -20,6 +21,7 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 		private static readonly int SprintHash = Animator.StringToHash("Sprint");
 		private static readonly int JumpHash = Animator.StringToHash("Jump");
 		private static readonly int LandHash = Animator.StringToHash("Land");
+		private static readonly int FlatHash = Animator.StringToHash("Flat");
 
 		// локальное состояние
 		private bool _wasGrounded;
@@ -28,12 +30,13 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 		private const float SpeedDamp = 0.1f;
 		private const float YVelDamp = 0.1f;
 
-		public PlayerAnimationController(IInputService input, PlayerConfig config, global::PlayerView view)
+		public PlayerAnimationController(IInputService input, PlayerConfig config, PlayerView view, PlayerModel playerModel)
 		{
 			_input = input;
 			_config = config;
 			_view = view;
 			_anim = view.Animator;
+			_playerModel = playerModel;
 		}
 
 		public void OnUpdate(float dt)
@@ -68,10 +71,16 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 			_anim.SetBool(SprintHash, _input.IsSprinting);
 
 			if (_wasGrounded && !grounded && yVel > 0.05f)
+			{
 				_anim.SetTrigger(JumpHash);
+			}
 
 			if (!_wasGrounded && grounded)
+			{
 				_anim.SetTrigger(LandHash);
+			}
+			
+			_anim.SetBool(FlatHash, _playerModel.State == PlayerState.Flat);
 
 			_wasGrounded = grounded;
 		}

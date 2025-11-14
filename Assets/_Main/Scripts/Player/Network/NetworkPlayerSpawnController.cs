@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Threading;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
 using Cysharp.Threading.Tasks;
-using FishNet.Object;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
@@ -16,6 +14,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	private readonly INetworkObjectFactory _objectFactory;
 	private readonly PlayerFactory _playerFactory;
 	private readonly LifecycleService _lifecycle;
+	private readonly Transform[] _playerSpawnPoints;
 
 	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
 
@@ -24,13 +23,15 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		INetworkConnectionEvents connectionEvents,
 		IObjectFactory objectFactory,
 		PlayerFactory playerFactory,
-		LifecycleService lifecycle)
+		LifecycleService lifecycle,
+		Transform[] playerSpawnPoints)
 	{
 		_networkService = networkService;
 		_connection = connectionEvents;
 		_objectFactory = objectFactory as INetworkObjectFactory;
 		_playerFactory = playerFactory;
 		_lifecycle = lifecycle;
+		_playerSpawnPoints = playerSpawnPoints;
 	}
 
 	public void Activate()
@@ -102,8 +103,11 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
+		var index = _networkService.PlayersCount % _playerSpawnPoints.Length;
+		var spawnPoint = _playerSpawnPoints[index];
+
 		var connection = _networkService.GetClientConnection(clientId);
 		await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
-			Vector3.zero, Quaternion.identity, connection);
+			spawnPoint.position, Quaternion.identity, connection);
 	}
 }

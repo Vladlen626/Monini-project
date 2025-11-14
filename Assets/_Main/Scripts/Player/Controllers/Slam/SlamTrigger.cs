@@ -7,30 +7,36 @@ namespace _Main.Scripts.Player
 {
 	public class SlamTrigger : MonoBehaviour
 	{
-		public event Action<int>  OnSlamImpactReceived;
+		public event Action<int> OnSlamImpactReceived;
 		[SerializeField] private NetworkObject _netObject;
 
 		private PlayerModel _playerModel;
 		private bool _active = false;
+
 		public void SetPlayerModel(PlayerModel playerModel)
 		{
 			_playerModel = playerModel;
+			_playerModel.OnPlayerStateChanged += OnPlayerStateChangedHandler;
 			_active = true;
 		}
-		
+
+		private void OnPlayerStateChangedHandler(PlayerState playerState)
+		{
+			transform.localScale = playerState == PlayerState.Slam ? Vector3.one : Vector3.zero;
+		}
+
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!_active)
 			{
 				return;
 			}
-			
-			
+
 			if (_playerModel.State != PlayerState.Slam)
 			{
 				return;
 			}
-			
+
 			var netObject = other.GetComponent<NetworkObject>();
 			if (netObject == null)
 			{
@@ -41,16 +47,14 @@ namespace _Main.Scripts.Player
 			{
 				return;
 			}
-			
+
 			var impactReceiver = other.GetComponent<ISlamImpactReceiver>();
 			if (impactReceiver == null)
 			{
 				return;
 			}
-			
+
 			OnSlamImpactReceived?.Invoke(netObject.ObjectId);
 		}
 	}
-	
-	
 }

@@ -11,6 +11,7 @@ namespace _Main.Scripts.Core
 		bool IsClient { get; }
 		bool IsHost { get; }
 		int LocalClientId { get; }
+		int PlayersCount { get; }
 		void StartHost();
 		void StartClient();
 		void Stop();

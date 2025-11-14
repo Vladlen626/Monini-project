@@ -52,6 +52,7 @@ namespace _Main.Scripts.Core
 		protected override async UniTask LaunchGameAsync(GameContext context)
 		{
 			var splash = _serviceLocator.Get<ISplashScreenService>();
+			var log = _serviceLocator.Get<ILoggerService>();
 			var scene = _serviceLocator.Get<ISceneService>();
 			var audio = _serviceLocator.Get<IAudioService>();
 			var ui = _serviceLocator.Get<IUIService>();
@@ -61,14 +62,23 @@ namespace _Main.Scripts.Core
 			
 			cursor.UnlockCursor();
 
-			await scene.LoadSceneAsync(SceneNames.Hub, ApplicationCancellationToken);
+			var firstScene = SceneNames.Hub;
+			await scene.LoadSceneAsync(firstScene, ApplicationCancellationToken);
+			
+			if (!scene.TryGetSceneContext(firstScene, out var sceneContext))
+			{
+				log.LogError($"[GAME ROOT] Scene {firstScene} load without Scene Context");
+				return;
+			}
+			
 			
 			var playerFactory = new PlayerFactory();
 			var networkConnectionController = new NetworkConnectionController();
 			var networkControllers = new IBaseController[]
 			{
 				networkConnectionController,
-				new NetworkPlayerSpawnController(network, networkConnectionController, objectFactory, playerFactory, _lifecycle),
+				new NetworkPlayerSpawnController(network, networkConnectionController, objectFactory, playerFactory,
+					_lifecycle, sceneContext.PlayerSpawnPoints),
 			};
 
 			foreach (var controller in networkControllers)
@@ -81,7 +91,7 @@ namespace _Main.Scripts.Core
 			if (tags is { Length: > 0 })
 			{
 				var tag = tags[0];
-				if (tag == "Client") // Тег твоего второго игрока
+				if (tag == "Client")
 				{
 					network.StartClient();
 				}
@@ -105,5 +115,6 @@ namespace _Main.Scripts.Core
 	public static class SceneNames
 	{
 		public const string Hub = "hub";
+		public const string TestScene = "test_scene";
 	}
 }
