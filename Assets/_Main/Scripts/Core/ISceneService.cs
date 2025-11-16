@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using UnityEngine.SceneManagement;
@@ -19,5 +20,11 @@ namespace PlatformCore.Services
 		UniTask ActivatePreloadedScene(string sceneName);
 		UniTask PreloadSceneAsync(string sceneName, CancellationToken ct = default);
 		UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default);
+	}
+	
+	public interface ISceneFlowService
+	{
+		event Action<string> OnSceneChangeRequested;
+		void RequestSceneChange(string sceneName);
 	}
 }

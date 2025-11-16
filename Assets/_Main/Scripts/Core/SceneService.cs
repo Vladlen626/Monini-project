@@ -156,7 +156,6 @@ namespace PlatformCore.Services
 					return true;
 				}
 
-				// Если лежит глубже
 				sceneContext = roots[i].GetComponentInChildren<SceneContext>(true);
 				if (sceneContext != null) return true;
 			}

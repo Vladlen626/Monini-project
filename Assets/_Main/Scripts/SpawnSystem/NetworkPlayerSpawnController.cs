@@ -14,7 +14,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	private readonly INetworkObjectFactory _objectFactory;
 	private readonly PlayerFactory _playerFactory;
 	private readonly LifecycleService _lifecycle;
-	private readonly Transform[] _playerSpawnPoints;
+	private readonly GameModelContext _gameModelContext;
 
 	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
 
@@ -24,14 +24,14 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		IObjectFactory objectFactory,
 		PlayerFactory playerFactory,
 		LifecycleService lifecycle,
-		Transform[] playerSpawnPoints)
+		GameModelContext gameModelContext)
 	{
 		_networkService = networkService;
 		_connection = connectionEvents;
 		_objectFactory = objectFactory as INetworkObjectFactory;
 		_playerFactory = playerFactory;
 		_lifecycle = lifecycle;
-		_playerSpawnPoints = playerSpawnPoints;
+		_gameModelContext = gameModelContext;
 	}
 
 	public void Activate()
@@ -103,11 +103,34 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		var index = _networkService.PlayersCount % _playerSpawnPoints.Length;
-		var spawnPoint = _playerSpawnPoints[index];
+		var index = _networkService.PlayersCount % _gameModelContext.SceneContext.PlayerSpawnPoints.Length;
+		var spawnPoint = _gameModelContext.SceneContext.PlayerSpawnPoints[index];
 
 		var connection = _networkService.GetClientConnection(clientId);
 		await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
 			spawnPoint.position, Quaternion.identity, connection);
+	}
+
+	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)
+	{
+		if (!_networkService.IsServer)
+		{
+			return;
+		}
+
+		var i = 0;
+		foreach (var kvp in _ownerContexts)
+		{
+			var ctx = kvp.Value;
+
+			var spawnPoint = spawnPoints[i % spawnPoints.Length];
+			i++;
+
+			var t = ctx.View.transform;
+			t.position = spawnPoint.position;
+			t.rotation = spawnPoint.rotation;
+		}
+
+		await UniTask.Yield();
 	}
 }

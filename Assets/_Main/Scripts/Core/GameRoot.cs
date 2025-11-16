@@ -1,5 +1,6 @@
 using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player;
+using _Main.Scripts.Player.Network;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure;
@@ -17,7 +18,7 @@ namespace _Main.Scripts.Core
 		protected override void RegisterServices(GameContext context)
 		{
 			Debug.Log("[GameRoot] Register services...");
-			
+
 			//Global
 			var logger = new LoggerService();
 			var resourcesService = new ResourceService(logger);
@@ -26,14 +27,16 @@ namespace _Main.Scripts.Core
 			var cursorService = new CursorService(uiService);
 			var splashScreenService = new SplashScreenService(uiService);
 			var sceneService = new SceneService(logger);
+			var sceneFlowService = new SceneFlowService();
 
 			//Network
 			var networkService = new NetworkService();
-			
+
 			//NetworkDepended
 			var objectFactory = new ObjectFactory(resourcesService, logger, networkService);
 
 			//Register
+			_serviceLocator.Register<ISceneFlowService, SceneFlowService>(sceneFlowService);
 			_serviceLocator.Register<ILoggerService, LoggerService>(logger);
 			_serviceLocator.Register<IResourceService, ResourceService>(resourcesService);
 			_serviceLocator.Register<IObjectFactory, ObjectFactory>(objectFactory);
@@ -51,41 +54,40 @@ namespace _Main.Scripts.Core
 
 		protected override async UniTask LaunchGameAsync(GameContext context)
 		{
-			var splash = _serviceLocator.Get<ISplashScreenService>();
-			var log = _serviceLocator.Get<ILoggerService>();
-			var scene = _serviceLocator.Get<ISceneService>();
-			var audio = _serviceLocator.Get<IAudioService>();
-			var ui = _serviceLocator.Get<IUIService>();
 			var cursor = _serviceLocator.Get<ICursorService>();
 			var network = _serviceLocator.Get<INetworkService>();
 			var objectFactory = _serviceLocator.Get<IObjectFactory>();
-			
-			cursor.UnlockCursor();
+			var sceneFlowService = _serviceLocator.Get<SceneFlowService>();
+			var gameModelContext = new GameModelContext();
 
-			var firstScene = SceneNames.Hub;
-			await scene.LoadSceneAsync(firstScene, ApplicationCancellationToken);
-			
-			if (!scene.TryGetSceneContext(firstScene, out var sceneContext))
-			{
-				log.LogError($"[GAME ROOT] Scene {firstScene} load without Scene Context");
-				return;
-			}
-			
-			
+			cursor.UnlockCursor();
 			var playerFactory = new PlayerFactory();
 			var networkConnectionController = new NetworkConnectionController();
-			var networkControllers = new IBaseController[]
+			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,
+				objectFactory, playerFactory, _lifecycle, gameModelContext);
+
+			var gameFlowController = new GameFlowController(_serviceLocator, gameModelContext, networkSpawnController);
+
+			var controllersArray = new IBaseController[]
 			{
 				networkConnectionController,
-				new NetworkPlayerSpawnController(network, networkConnectionController, objectFactory, playerFactory,
-					_lifecycle, sceneContext.PlayerSpawnPoints),
+				networkSpawnController,
+				gameFlowController
 			};
 
-			foreach (var controller in networkControllers)
+			foreach (var controller in controllersArray)
 			{
 				await _lifecycle.RegisterAsync(controller);
 			}
 
+			StartNetwork(network);
+
+			sceneFlowService.RequestSceneChange(SceneNames.Hub);
+			cursor.LockCursor();
+		}
+
+		private void StartNetwork(INetworkService networkService)
+		{
 #if UNITY_EDITOR
 			var tags = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags();
 			if (tags is { Length: > 0 })
@@ -93,28 +95,27 @@ namespace _Main.Scripts.Core
 				var tag = tags[0];
 				if (tag == "Client")
 				{
-					network.StartClient();
+					networkService.StartClient();
 				}
 				else
 				{
-					network.StartHost();
+					networkService.StartHost();
 				}
 			}
 			else
 			{
-				network.StartHost();
+				networkService.StartHost();
 			}
 #else
     network.StartHost(); // обычный билд
 #endif
-	
-			cursor.LockCursor();
 		}
 	}
 
 	public static class SceneNames
 	{
 		public const string Hub = "hub";
+		public const string ParisCenter = "paris_center";
 		public const string TestScene = "test_scene";
 	}
 }
