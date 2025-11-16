@@ -57,14 +57,14 @@ namespace _Main.Scripts.Core
 			var cursor = _serviceLocator.Get<ICursorService>();
 			var network = _serviceLocator.Get<INetworkService>();
 			var objectFactory = _serviceLocator.Get<IObjectFactory>();
-			var sceneFlowService = _serviceLocator.Get<SceneFlowService>();
+			var sceneFlowService = _serviceLocator.Get<ISceneFlowService>();
 			var gameModelContext = new GameModelContext();
 
 			cursor.UnlockCursor();
 			var playerFactory = new PlayerFactory();
 			var networkConnectionController = new NetworkConnectionController();
 			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,
-				objectFactory, playerFactory, _lifecycle, gameModelContext);
+				objectFactory, _lifecycle, gameModelContext, playerFactory);
 
 			var gameFlowController = new GameFlowController(_serviceLocator, gameModelContext, networkSpawnController);
 
@@ -110,12 +110,5 @@ namespace _Main.Scripts.Core
     network.StartHost(); // обычный билд
 #endif
 		}
-	}
-
-	public static class SceneNames
-	{
-		public const string Hub = "hub";
-		public const string ParisCenter = "paris_center";
-		public const string TestScene = "test_scene";
 	}
 }

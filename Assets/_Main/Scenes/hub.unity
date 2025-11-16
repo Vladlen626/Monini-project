@@ -3068,9 +3068,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b462ff4b3cdd83342906f9ac5dcf58c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneContext
-  playerSpawnPoints:
+  _playerSpawnPoints:
   - {fileID: 1408607668}
   - {fileID: 1758625048}
+  _nextAreaNetworkBehaviours:
+  - {fileID: 4539072626879235550}
 --- !u!1 &1986890558
 GameObject:
   m_ObjectHideFlags: 0
@@ -3570,6 +3572,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: af83e46f238602042ac80c97720b12b3, type: 3}
+--- !u!114 &4539072626879235550 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6832130802710918713, guid: af83e46f238602042ac80c97720b12b3, type: 3}
+  m_PrefabInstance: {fileID: 4539072626879235549}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8b6bbceac4401f8c7889b8f3bd2aa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Location.NextAreaNetworkBehaviour
 --- !u!1001 &7116440140040648449
 PrefabInstance:
   m_ObjectHideFlags: 0

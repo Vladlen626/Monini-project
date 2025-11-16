@@ -741,8 +741,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a8b6183ca646aba3c7f7062370ce03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PlatformCore::PlatformCore.Core.GameContext
+  _playersParentTransform: {fileID: 1160060454}
   StaticCanvas: {fileID: 223825904}
   DynamicCanvas: {fileID: 701970369}
+--- !u!1 &1160060453
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1160060454}
+  m_Layer: 0
+  m_Name: Players
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1160060454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1160060453}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -752,3 +784,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 269698225}
   - {fileID: 415931615}
+  - {fileID: 1160060454}

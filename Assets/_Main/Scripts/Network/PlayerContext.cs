@@ -70,4 +70,27 @@ public abstract class PlayerContext : IDisposable
 			Camera = null;
 		}
 	}
+	
+	// ========= SERVER =========
+	public sealed class Server : PlayerContext
+	{
+		public int OwnerId { get; private set; }
+
+		private Server() { }
+		
+		public static Server Create(
+			int ownerId,
+			PlayerView view,
+			PlayerFactory playerFactory)
+		{
+			var ctx = new Server
+			{
+				OwnerId = ownerId,
+				View = view,
+				Model = new PlayerModel()
+			};
+
+			return ctx;
+		}
+	}
 }

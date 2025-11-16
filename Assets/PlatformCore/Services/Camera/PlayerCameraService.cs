@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using PlatformCore.Services.Factory;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services
 {
@@ -11,20 +12,23 @@ namespace PlatformCore.Services
 	{
 		private const string PlayerCamera = "PlayerCamera";
 		private readonly IObjectFactory _objectFactory;
+		private readonly Transform _cameraParent;
+		
 		private CinemachineBasicMultiChannelPerlin _noise;
 		private CinemachineCamera _camera;
 		private CancellationTokenSource _shakeCts;
 		public bool IsShaking { get; private set; }
 
-		public CameraLocalService(IObjectFactory objectFactory)
+		public CameraLocalService(IObjectFactory objectFactory, Transform cameraParent = null)
 		{
 			_objectFactory = objectFactory;
+			_cameraParent = cameraParent;
 		}
 
 		protected override async UniTask OnInitAsync(CancellationToken ct)
 		{
 			_camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Main.CinemachineCamera,
-				Vector3.zero, Quaternion.identity);
+				Vector3.zero, Quaternion.identity, _cameraParent);
 			_noise = (CinemachineBasicMultiChannelPerlin)_camera.GetCinemachineComponent(CinemachineCore.Stage.Noise);
 			_camera.name = PlayerCamera;
 		}

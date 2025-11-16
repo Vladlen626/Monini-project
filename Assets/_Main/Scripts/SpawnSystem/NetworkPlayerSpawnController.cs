@@ -6,6 +6,7 @@ using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 {
@@ -22,16 +23,16 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		INetworkService networkService,
 		INetworkConnectionEvents connectionEvents,
 		IObjectFactory objectFactory,
-		PlayerFactory playerFactory,
 		LifecycleService lifecycle,
-		GameModelContext gameModelContext)
+		GameModelContext gameModelContext,
+		PlayerFactory playerFactory)
 	{
 		_networkService = networkService;
 		_connection = connectionEvents;
 		_objectFactory = objectFactory as INetworkObjectFactory;
-		_playerFactory = playerFactory;
 		_lifecycle = lifecycle;
 		_gameModelContext = gameModelContext;
+		_playerFactory = playerFactory;
 	}
 
 	public void Activate()
@@ -107,8 +108,12 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		var spawnPoint = _gameModelContext.SceneContext.PlayerSpawnPoints[index];
 
 		var connection = _networkService.GetClientConnection(clientId);
-		await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
+		var nob = await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
 			spawnPoint.position, Quaternion.identity, connection);
+		SceneManager.MoveGameObjectToScene(nob.gameObject, SceneManager.GetSceneByName(SceneNames.preloader));
+		var view = nob.GetComponent<PlayerView>();
+		var serverCtx = PlayerContext.Server.Create(clientId, view, _playerFactory);
+		_ownerContexts[clientId] = serverCtx;	
 	}
 
 	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)
