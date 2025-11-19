@@ -80,8 +80,13 @@ namespace PlatformCore.Services
 					throw new InvalidOperationException($"Failed to start loading scene: {sceneName}");
 				}
 
+				if (mode == LoadSceneMode.Single)
+				{
+					SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
+				}
+				
+				
 				await operation.ToUniTask(cancellationToken: ct);
-				SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
 
 				_loggerService?.Log($"[SceneService] Scene loaded successfully: {sceneName}");
 			}

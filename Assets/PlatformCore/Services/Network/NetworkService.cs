@@ -12,12 +12,14 @@ namespace _Main.Scripts.Core
 	public class NetworkService : INetworkService, IService
 	{
 		private readonly NetworkManager _networkManager;
+		public NetworkManager NetworkManager => _networkManager;
 		public bool IsServer => _networkManager.ServerManager.Started;
 
 		public bool IsClient => _networkManager.ClientManager.Started;
 
 		public bool IsHost => IsServer && IsClient;
 
+		public bool IsServerStarted => _networkManager.IsServerStarted;
 		public int LocalClientId => _networkManager.ClientManager.Connection.ClientId;
 		public int PlayersCount =>  _networkManager.ServerManager.Clients.Count;
 

@@ -9,6 +9,7 @@ using PlatformCore.Services.Audio;
 using PlatformCore.Services.Factory;
 using PlatformCore.Services.UI;
 using PlatformCore.Services.UI.SplashScreen;
+using Unity.Collections;
 using UnityEngine;
 
 namespace _Main.Scripts.Core
@@ -26,7 +27,7 @@ namespace _Main.Scripts.Core
 			var uiService = new UIBaseService(logger, resourcesService, context.StaticCanvas, context.DynamicCanvas);
 			var cursorService = new CursorService(uiService);
 			var splashScreenService = new SplashScreenService(uiService);
-			var sceneService = new SceneService(logger);
+			var sceneService = new FishNetSceneService(logger);
 			var sceneFlowService = new SceneFlowService();
 
 			//Network
@@ -44,7 +45,7 @@ namespace _Main.Scripts.Core
 			_serviceLocator.Register<IUIService, UIBaseService>(uiService);
 			_serviceLocator.Register<ICursorService, CursorService>(cursorService);
 			_serviceLocator.Register<ISplashScreenService, SplashScreenService>(splashScreenService);
-			_serviceLocator.Register<ISceneService, SceneService>(sceneService);
+			_serviceLocator.Register<ISceneService, FishNetSceneService>(sceneService);
 
 			//Network Services Register
 			_serviceLocator.Register<INetworkService, NetworkService>(networkService);
@@ -59,6 +60,10 @@ namespace _Main.Scripts.Core
 			var objectFactory = _serviceLocator.Get<IObjectFactory>();
 			var sceneFlowService = _serviceLocator.Get<ISceneFlowService>();
 			var gameModelContext = new GameModelContext();
+
+			StartNetwork(network);
+
+			await UniTask.WaitUntil(() => network.IsServerStarted);
 
 			cursor.UnlockCursor();
 			var playerFactory = new PlayerFactory();
@@ -79,8 +84,6 @@ namespace _Main.Scripts.Core
 			{
 				await _lifecycle.RegisterAsync(controller);
 			}
-
-			StartNetwork(network);
 
 			sceneFlowService.RequestSceneChange(SceneNames.Hub);
 			cursor.LockCursor();

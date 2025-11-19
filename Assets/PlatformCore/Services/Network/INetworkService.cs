@@ -7,9 +7,11 @@ namespace _Main.Scripts.Core
 {
 	public interface INetworkService
 	{
+		NetworkManager NetworkManager { get; }
 		bool IsServer { get; }
 		bool IsClient { get; }
 		bool IsHost { get; }
+		bool IsServerStarted { get; }
 		int LocalClientId { get; }
 		int PlayersCount { get; }
 		void StartHost();

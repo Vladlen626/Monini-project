@@ -46,9 +46,6 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);
-		
-		var mainScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneNames.preloader);
-		UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(ctx.Camera.GetCameraTransform().gameObject, mainScene);
 		_slamTrigger.SetPlayerModel(ctx.Model);
 
 		foreach (var c in ctx.Controllers)

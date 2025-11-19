@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
 using Cysharp.Threading.Tasks;
+using FishNet.Managing.Scened;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
@@ -37,6 +38,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 	public void Activate()
 	{
+		_networkService.NetworkManager.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChanged;
 		_connection.OnLocalClientConnected += OnLocalClientConnected;
 		_connection.OnLocalClientDisconnected += OnLocalClientDisconnected;
 		_connection.OnRemoteClientConnected += OnRemoteClientConnected;
@@ -45,6 +47,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 	public void Deactivate()
 	{
+		_networkService.NetworkManager.SceneManager.OnClientPresenceChangeEnd -= OnClientPresenceChanged;
 		_connection.OnLocalClientConnected -= OnLocalClientConnected;
 		_connection.OnLocalClientDisconnected -= OnLocalClientDisconnected;
 		_connection.OnRemoteClientConnected -= OnRemoteClientConnected;
@@ -104,16 +107,30 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
+		if (_gameModelContext.SceneContext == null ||
+		    _gameModelContext.SceneContext.PlayerSpawnPoints == null ||
+		    _gameModelContext.SceneContext.PlayerSpawnPoints.Length == 0)
+		{
+			return;
+		}
+
 		var index = _networkService.PlayersCount % _gameModelContext.SceneContext.PlayerSpawnPoints.Length;
 		var spawnPoint = _gameModelContext.SceneContext.PlayerSpawnPoints[index];
 
 		var connection = _networkService.GetClientConnection(clientId);
 		var nob = await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
 			spawnPoint.position, Quaternion.identity, connection);
-		SceneManager.MoveGameObjectToScene(nob.gameObject, SceneManager.GetSceneByName(SceneNames.preloader));
 		var view = nob.GetComponent<PlayerView>();
 		var serverCtx = PlayerContext.Server.Create(clientId, view, _playerFactory);
-		_ownerContexts[clientId] = serverCtx;	
+		_ownerContexts[clientId] = serverCtx;
+	}
+
+	private void OnClientPresenceChanged(ClientPresenceChangeEventArgs args)
+	{
+		if (args.Added)
+		{
+			RespawnAllPlayers(_gameModelContext.SceneContext.PlayerSpawnPoints).Forget();
+		}
 	}
 
 	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)
