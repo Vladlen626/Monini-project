@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
+using FishNet.Component.Transforming;
 using FishNet.Connection;
 using FishNet.Object;
 using PlatformCore.Core;
@@ -9,17 +10,19 @@ using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerView))]
+[RequireComponent(typeof(PlayerView), typeof(NetworkTransform))]
 public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 {
 	[SerializeField] private GameObject _slamFx;
 	[SerializeField] private SlamTrigger _slamTrigger;
 
 	private PlayerView _view;
+	private NetworkTransform _networkTransform;
 
 	private void Awake()
 	{
 		_view = GetComponent<PlayerView>();
+		_networkTransform = GetComponent<NetworkTransform>();
 		_slamTrigger.OnSlamImpactReceived += OnSlamImpactHandler;
 	}
 
@@ -30,8 +33,8 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 
 	public override async void OnStartClient()
 	{
-		base.OnStartClient();
-
+		base.OnStartClient(); 
+		MoveToPersistent(gameObject);
 		if (!IsOwner)
 		{
 			return;
@@ -42,15 +45,25 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 
 		var playerFactory = new PlayerFactory();
 
-		var ctx = await PlayerContext.Client.CreateAsync(_view, objectFactory, playerFactory,
+		var ctx = await PlayerContext.Client.CreateAsync(this, _view, objectFactory, playerFactory,
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);
+		var cam = ctx.Camera.GetCameraTransform();
+		MoveToPersistent(cam.gameObject);
 		_slamTrigger.SetPlayerModel(ctx.Model);
 
 		foreach (var c in ctx.Controllers)
 		{
 			await lifecycle.RegisterAsync(c);
+		}
+	}
+	private void MoveToPersistent(GameObject gameObjectToMove)
+	{
+		var persistent = UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneNames.PersistentScene);
+		if (persistent.IsValid())
+		{
+			UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObjectToMove, persistent);
 		}
 	}
 
@@ -101,5 +114,23 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	public void Rpc_PlaySlamFX(Vector3 pos)
 	{
 		Instantiate(_slamFx, pos, Quaternion.Euler(-90, 0, 0));
+	}
+	
+	[Server]
+	public void Server_TeleportOwner(Vector3 position, Quaternion rotation)
+	{
+		if (!Owner.IsValid)
+		{
+			return;
+		}
+
+		Target_TeleportOwner(Owner, position, rotation);
+	}
+
+	[TargetRpc]
+	private void Target_TeleportOwner(NetworkConnection target, Vector3 position, Quaternion rotation)
+	{
+		_view.TeleportTo(position, rotation);
+		_networkTransform.Teleport();
 	}
 }

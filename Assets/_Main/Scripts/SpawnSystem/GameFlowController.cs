@@ -4,109 +4,113 @@ using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services;
+using UnityEngine.SceneManagement;
 
 namespace _Main.Scripts.Player.Network
 {
 	public class GameFlowController : IBaseController, IActivatable
 	{
 		private readonly ISceneService _sceneService;
-		private readonly ILoggerService _loggerService;
-		private readonly INetworkService _networkService;
-		private readonly ISceneFlowService _sceneFlowService;
+		private readonly ILoggerService _logger;
+		private readonly INetworkService _network;
+		private readonly ISceneFlowService _sceneFlow;
 		private readonly GameModelContext _model;
 		private readonly LifecycleService _lifecycle;
-		private readonly NetworkPlayerSpawnController _spawnController;
+		private readonly NetworkPlayerSpawnController _spawn;
 
-		private readonly List<IBaseController> _sceneControllers = new List<IBaseController>();
+		private readonly List<IBaseController> _sceneControllers = new();
 
-		private string _currentAdditiveScene;
+		private string _currentEnvironmentScene;
 		private bool _isChangingScene;
 
 		public GameFlowController(
 			ServiceLocator services,
 			GameModelContext model,
-			NetworkPlayerSpawnController spawnController)
+			NetworkPlayerSpawnController spawn)
 		{
 			_model = model;
-			_spawnController = spawnController;
+			_spawn = spawn;
 
 			_sceneService = services.Get<ISceneService>();
-			_sceneFlowService = services.Get<ISceneFlowService>();
+			_sceneFlow = services.Get<ISceneFlowService>();
 			_lifecycle = services.Get<LifecycleService>();
-			_loggerService = services.Get<ILoggerService>();
-			_networkService = services.Get<INetworkService>();
+			_logger = services.Get<ILoggerService>();
+			_network = services.Get<INetworkService>();
 		}
 
 		public void Activate()
 		{
-			_sceneFlowService.OnSceneChangeRequested += SceneChangeRequestHandler;
+			_sceneFlow.OnSceneChangeRequested += OnSceneChange;
 		}
 
 		public void Deactivate()
 		{
-			_sceneFlowService.OnSceneChangeRequested -= SceneChangeRequestHandler;
+			_sceneFlow.OnSceneChangeRequested -= OnSceneChange;
 		}
 
-		private void SceneChangeRequestHandler(string sceneName)
+		private void OnSceneChange(string sceneName)
 		{
+			if (!_network.IsServer)
+			{
+				return;
+			}
+
 			ChangeScene(sceneName).Forget();
 		}
 
 		private async UniTask ChangeScene(string sceneName)
 		{
 			if (_isChangingScene)
+			{
 				return;
+			}
 
 			_isChangingScene = true;
-			_loggerService.Log($"[GameFlow] ChangeScene → {sceneName}");
+			_logger.Log($"[GameFlow] Load environment: {sceneName}");
 
-			// ----- UNLOAD OLD -----
-			if (_currentAdditiveScene != null)
+			if (!string.IsNullOrEmpty(_currentEnvironmentScene))
 			{
-				await _sceneService.UnloadSceneAsync(_currentAdditiveScene);
+				var persistent = SceneManager.GetSceneByName(SceneNames.PersistentScene);
+				if (persistent.IsValid())
+				{
+					SceneManager.SetActiveScene(persistent);
+				}
+				
+				await _sceneService.UnloadSceneAsync(_currentEnvironmentScene);
 			}
 
-			// ----- LOAD NEW -----
-			await _sceneService.LoadSceneAsync(sceneName);
-			_currentAdditiveScene = sceneName;
-
-			// ----- WAIT FOR CONTEXT -----
-			SceneContext ctx = null;
-
-			for (int i = 0; i < 100; i++)
+			await _sceneService.LoadEnvironmentSceneAsync(sceneName, false);
+			_currentEnvironmentScene = sceneName;
+			
+			await UniTask.Yield();
+			
+			if (!_sceneService.TryGetSceneContext(sceneName, out var context))
 			{
-				if (_sceneService.TryGetSceneContext(sceneName, out ctx))
-					break;
-
-				await UniTask.Yield();
+				_logger.LogError($"[GameFlow] SceneContext not found: {sceneName}");
+				_isChangingScene = false;
+				return;
 			}
 
-			if (ctx == null)
-			{
-				_loggerService.LogError($"[GameFlow] SceneContext NOT FOUND: {sceneName}");
-			}
+			_model.SceneContext = context;
 
-			_model.SceneContext = ctx;
-
-			// ----- REMOVE OLD SCENE CONTROLLERS -----
 			foreach (var ctrl in _sceneControllers)
+			{
 				_lifecycle.Unregister(ctrl);
+			}
 
 			_sceneControllers.Clear();
 
-			// ----- CREATE NEW SCENE CONTROLLERS -----
-			if (ctx != null)
+			foreach (var area in context.NextAreaNetworkBehaviours)
 			{
-				foreach (var area in ctx.NextAreaNetworkBehaviours)
-				{
-					var c = new NetworkPlayerNextAreaController(area, _networkService, _sceneFlowService);
-					await _lifecycle.RegisterAsync(c);
-					_sceneControllers.Add(c);
-				}
-
-				// TELEPORT PLAYERS
-				await _spawnController.RespawnAllPlayers(ctx.PlayerSpawnPoints);
+				var controller = new NetworkPlayerNextAreaController(area, _network, _sceneFlow, _model);
+				await _lifecycle.RegisterAsync(controller);
+				_sceneControllers.Add(controller);
 			}
+
+			await UniTask.Yield();
+			await _spawn.SpawnAllPlayersForCurrentScene();
+			await UniTask.Yield();
+			await _spawn.RespawnAllPlayers(context.PlayerSpawnPoints);
 
 			_isChangingScene = false;
 		}

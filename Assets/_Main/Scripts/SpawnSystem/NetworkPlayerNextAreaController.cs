@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using _Main.Scripts.Core;
 using _Main.Scripts.Location;
+using FishNet.Managing.Scened;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services;
@@ -14,6 +15,7 @@ namespace _Main.Scripts.Player.Network
 		private readonly NextAreaNetworkBehaviour _nextAreaNetworkBehaviour;
 		private readonly INetworkService _networkService;
 		private readonly ISceneFlowService _sceneFlowService;
+		private readonly GameModelContext _gameModelContext;
 
 		private HashSet<int> _playerIds = new HashSet<int>();
 		private float _timer;
@@ -22,11 +24,12 @@ namespace _Main.Scripts.Player.Network
 		private bool _teleportExecuted;
 
 		public NetworkPlayerNextAreaController(NextAreaNetworkBehaviour nextAreaNetworkBehaviour,
-			INetworkService networkService, ISceneFlowService sceneFlowService)
+			INetworkService networkService, ISceneFlowService sceneFlowService, GameModelContext gameModelContext)
 		{
 			_nextAreaNetworkBehaviour = nextAreaNetworkBehaviour;
 			_networkService = networkService;
 			_sceneFlowService = sceneFlowService;
+			_gameModelContext = gameModelContext;
 		}
 
 		public void Activate()
@@ -65,7 +68,7 @@ namespace _Main.Scripts.Player.Network
 				if (_timer >= RequiredTime)
 				{
 					_teleportExecuted = true;
-					_sceneFlowService.RequestSceneChange(SceneNames.ParisCenter);
+					_sceneFlowService.RequestSceneChange(_gameModelContext.SceneContext.NextSceneName);
 				}
 			}
 		}

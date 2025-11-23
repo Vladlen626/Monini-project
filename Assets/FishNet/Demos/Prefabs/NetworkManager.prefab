@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7443408887813606049}
   - component: {fileID: 7443408887813606050}
   - component: {fileID: 934570884}
+  - component: {fileID: 72807164252382667}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -69,6 +70,26 @@ MonoBehaviour:
   _maximumTimedObserversDuration: 10
   _defaultConditions:
   - {fileID: 11400000, guid: 5f33eb0e5b83b5546822cfe42a305657, type: 2}
+  - {fileID: 11400000, guid: 2033f54fd2794464bae08fa5a55c8996, type: 2}
+--- !u!114 &72807164252382667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7443408887813606051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d0962ead4b02a34aae248fccce671ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Managing.Debugging.DebugManager
+  WriteSceneObjectDetails: 1
+  ValidateRpcLengths: 0
+  DisableObserversRpcLinks: 0
+  DisableTargetRpcLinks: 0
+  DisableServerRpcLinks: 0
+  DisableReplicateRpcLinks: 0
+  DisableReconcileRpcLinks: 0
 --- !u!1001 &2130063410
 PrefabInstance:
   m_ObjectHideFlags: 0

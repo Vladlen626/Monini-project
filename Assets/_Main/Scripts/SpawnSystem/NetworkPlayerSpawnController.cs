@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using _Main.Scripts.Core;
 using _Main.Scripts.Player;
 using Cysharp.Threading.Tasks;
-using FishNet.Managing.Scened;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
@@ -19,6 +18,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	private readonly GameModelContext _gameModelContext;
 
 	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
+	private readonly HashSet<int> _connectedClientIds = new();
 
 	public NetworkPlayerSpawnController(
 		INetworkService networkService,
@@ -38,26 +38,27 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 	public void Activate()
 	{
-		_networkService.NetworkManager.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChanged;
-		_connection.OnLocalClientConnected += OnLocalClientConnected;
 		_connection.OnLocalClientDisconnected += OnLocalClientDisconnected;
+
 		_connection.OnRemoteClientConnected += OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected += OnRemoteClientDisconnected;
+
+		_connection.OnRemoteClientLoadedStartScenes += OnRemoteClientLoadedStartScenes;
 	}
 
 	public void Deactivate()
 	{
-		_networkService.NetworkManager.SceneManager.OnClientPresenceChangeEnd -= OnClientPresenceChanged;
-		_connection.OnLocalClientConnected -= OnLocalClientConnected;
 		_connection.OnLocalClientDisconnected -= OnLocalClientDisconnected;
+
 		_connection.OnRemoteClientConnected -= OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected -= OnRemoteClientDisconnected;
+
+		_connection.OnRemoteClientLoadedStartScenes -= OnRemoteClientLoadedStartScenes;
 	}
 
-	// ========== CLIENT ==========
-	private void OnLocalClientConnected()
-	{
-	}
+	// ========================
+	// CLIENT EVENTS
+	// ========================
 
 	private void OnLocalClientDisconnected()
 	{
@@ -72,21 +73,27 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		}
 
 		_ownerContexts.Clear();
+		_connectedClientIds.Clear();
 	}
 
-	// ========== SERVER ==========
+	// ========================
+	// SERVER EVENTS
+	// ========================
+
 	private void OnRemoteClientConnected(int clientId)
 	{
-		if (_ownerContexts.ContainsKey(clientId))
+		if (!_networkService.IsServer)
 		{
 			return;
 		}
 
-		SpawnPlayerAsync(clientId).Forget();
+		_connectedClientIds.Add(clientId);
 	}
 
 	private void OnRemoteClientDisconnected(int clientId)
 	{
+		_connectedClientIds.Remove(clientId);
+
 		if (_ownerContexts.TryGetValue(clientId, out var ctx))
 		{
 			foreach (var c in ctx.Controllers)
@@ -99,38 +106,87 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		}
 	}
 
-	// ========== SERVER: SPAWN ==========
-	private async UniTask SpawnPlayerAsync(int clientId)
+	private void OnRemoteClientLoadedStartScenes(int clientId)
 	{
 		if (!_networkService.IsServer)
 		{
 			return;
 		}
 
-		if (_gameModelContext.SceneContext == null ||
-		    _gameModelContext.SceneContext.PlayerSpawnPoints == null ||
-		    _gameModelContext.SceneContext.PlayerSpawnPoints.Length == 0)
+		SpawnPlayerForCurrentScene(clientId).Forget();
+	}
+
+	// ========================
+	// PUBLIC API
+	// ========================
+	public async UniTask SpawnAllPlayersForCurrentScene()
+	{
+		if (!_networkService.IsServer)
 		{
 			return;
 		}
 
-		var index = _networkService.PlayersCount % _gameModelContext.SceneContext.PlayerSpawnPoints.Length;
-		var spawnPoint = _gameModelContext.SceneContext.PlayerSpawnPoints[index];
+		var ctx = _gameModelContext.SceneContext;
+		if (ctx == null || ctx.PlayerSpawnPoints == null || ctx.PlayerSpawnPoints.Length == 0)
+		{
+			return;
+		}
 
-		var connection = _networkService.GetClientConnection(clientId);
-		var nob = await _objectFactory.CreateNetworkAsync(ResourcePaths.Characters.Player,
-			spawnPoint.position, Quaternion.identity, connection);
-		var view = nob.GetComponent<PlayerView>();
-		var serverCtx = PlayerContext.Server.Create(clientId, view, _playerFactory);
-		_ownerContexts[clientId] = serverCtx;
+		foreach (int clientId in _connectedClientIds)
+		{
+			if (!_ownerContexts.ContainsKey(clientId))
+			{
+				await SpawnPlayerForCurrentScene(clientId);
+			}
+		}
 	}
 
-	private void OnClientPresenceChanged(ClientPresenceChangeEventArgs args)
+	public async UniTask SpawnPlayerForCurrentScene(int clientId)
 	{
-		if (args.Added)
+		if (!_networkService.IsServer)
 		{
-			RespawnAllPlayers(_gameModelContext.SceneContext.PlayerSpawnPoints).Forget();
+			return;
 		}
+
+		if (_ownerContexts.ContainsKey(clientId))
+		{
+			return;
+		}
+
+		var sceneCtx = _gameModelContext.SceneContext;
+		if (sceneCtx == null ||
+		    sceneCtx.PlayerSpawnPoints == null ||
+		    sceneCtx.PlayerSpawnPoints.Length == 0)
+		{
+			return;
+		}
+
+		int index = clientId % sceneCtx.PlayerSpawnPoints.Length;
+		var spawnPoint = sceneCtx.PlayerSpawnPoints[index];
+
+		var connection = _networkService.GetClientConnection(clientId);
+		if (connection == null)
+		{
+			return;
+		}
+
+		var nob = await _objectFactory.CreateNetworkAsync(
+			ResourcePaths.Characters.Player,
+			spawnPoint.position,
+			spawnPoint.rotation,
+			connection);
+
+		var persistent = SceneManager.GetSceneByName(SceneNames.PersistentScene);
+		if (persistent.IsValid())
+		{
+			SceneManager.MoveGameObjectToScene(nob.gameObject, persistent);
+		}
+
+		var view = nob.GetComponent<PlayerView>();
+		var bridge = nob.GetComponent<PlayerNetworkBridge>();
+		var serverCtx = PlayerContext.Server.Create(clientId, view, bridge);
+
+		_ownerContexts[clientId] = serverCtx;
 	}
 
 	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)
@@ -140,19 +196,22 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		var i = 0;
-		foreach (var kvp in _ownerContexts)
+		if (spawnPoints == null || spawnPoints.Length == 0)
 		{
-			var ctx = kvp.Value;
-
-			var spawnPoint = spawnPoints[i % spawnPoints.Length];
-			i++;
-
-			var t = ctx.View.transform;
-			t.position = spawnPoint.position;
-			t.rotation = spawnPoint.rotation;
+			return;
 		}
 
+		foreach (var kvp in _ownerContexts)
+		{
+			int clientId = kvp.Key;
+			var ctx = kvp.Value;
+
+			int index = clientId % spawnPoints.Length;
+			var point = spawnPoints[index];
+
+			ctx.Bridge.Server_TeleportOwner(point.position, point.rotation);
+		}
+		
 		await UniTask.Yield();
 	}
 }

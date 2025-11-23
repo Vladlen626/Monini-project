@@ -12,6 +12,7 @@ public abstract class PlayerContext : IDisposable
 {
 	public PlayerView View { get; protected set; }
 	public PlayerModel Model { get; protected set; }
+	public PlayerNetworkBridge Bridge { get; private set; }
 	public List<IBaseController> Controllers { get; protected set; } = new();
 
 	protected readonly List<IPlayerLocalService> _locals = new();
@@ -35,12 +36,13 @@ public abstract class PlayerContext : IDisposable
 		{
 		}
 
-		public static async UniTask<Client> CreateAsync(
+		public static async UniTask<Client> CreateAsync(PlayerNetworkBridge bridge,
 			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
 		{
 			var ctx = new Client
 			{
 				View = view,
+				Bridge = bridge,
 				Model = new PlayerModel()
 			};
 
@@ -81,12 +83,13 @@ public abstract class PlayerContext : IDisposable
 		public static Server Create(
 			int ownerId,
 			PlayerView view,
-			PlayerFactory playerFactory)
+			PlayerNetworkBridge bridge)
 		{
 			var ctx = new Server
 			{
 				OwnerId = ownerId,
 				View = view,
+				Bridge = bridge,
 				Model = new PlayerModel()
 			};
 

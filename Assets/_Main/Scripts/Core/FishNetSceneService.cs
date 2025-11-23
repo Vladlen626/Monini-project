@@ -20,42 +20,68 @@ namespace PlatformCore.Services
 		// PUBLIC API
 		// -------------------------------------------------------------------
 
+		/// <summary>
+		/// Load additive global scene (environment).
+		/// Persistent scenes не трогаются.
+		/// </summary>
 		public UniTask LoadSceneAsync(string sceneName, CancellationToken ct = default)
 		{
-			return LoadSceneInternal(sceneName, additive: true, ct);
+			return LoadSceneInternal(sceneName, unloadOthers: false, ct);
 		}
 
-		public UniTask LoadGlobalSceneAsync(string sceneName, CancellationToken ct = default)
+		/// <summary>
+		/// Load environment scene, optionally выгружая предыдущие environment-сцены.
+		/// Persistent-сцена НЕ выгружается.
+		/// </summary>
+		public UniTask LoadEnvironmentSceneAsync(string sceneName, bool unloadPrevious, CancellationToken ct = default)
 		{
-			return LoadSceneInternal(sceneName, additive: false, ct);
+			return LoadSceneInternal(sceneName, unloadPrevious, ct);
 		}
 
-		public UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default)
+		/// <summary>
+		/// Unload a scene by name.
+		/// </summary>
+		public async UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default)
 		{
-			var sm = InstanceFinder.SceneManager;
-
 			if (!IsSceneLoaded(sceneName))
 			{
 				_logger.LogWarning($"[FishNetSceneService] Scene '{sceneName}' not loaded → skip unload.");
-				return UniTask.CompletedTask;
+				return;
 			}
 
 			_logger.Log($"[FishNetSceneService] Unload scene '{sceneName}'");
 
+			var sm = InstanceFinder.SceneManager;
 			var data = new SceneUnloadData(sceneName);
+
+			var tcs = new UniTaskCompletionSource();
+
+			void OnUnload(SceneUnloadEndEventArgs args)
+			{
+				if (args.UnloadedScenesV2 != null)
+				{
+					foreach (var s in args.UnloadedScenesV2)
+					{
+						if (s.Name == sceneName)
+						{
+							sm.OnUnloadEnd -= OnUnload;
+							tcs.TrySetResult();
+							return;
+						}
+					}
+				}
+			}
+
+			sm.OnUnloadEnd += OnUnload;
 			sm.UnloadGlobalScenes(data);
 
-			return UniTask.CompletedTask;
-		}
-
-		public async UniTask ReloadCurrentSceneAsync(CancellationToken ct = default)
-		{
-			var name = GetActiveSceneName();
-			await LoadSceneInternal(name, additive: false, ct);
+			await tcs.Task.AttachExternalCancellation(ct);
 		}
 
 		public string GetActiveSceneName()
-			=> SceneManager.GetActiveScene().name;
+		{
+			return SceneManager.GetActiveScene().name;
+		}
 
 		public bool IsSceneLoaded(string sceneName)
 		{
@@ -69,14 +95,22 @@ namespace PlatformCore.Services
 
 			var scene = SceneManager.GetSceneByName(sceneName);
 			if (!scene.IsValid() || !scene.isLoaded)
+			{
 				return false;
+			}
 
 			foreach (var root in scene.GetRootGameObjects())
 			{
-				if (root.TryGetComponent(out ctx)) return true;
+				if (root.TryGetComponent(out ctx))
+				{
+					return true;
+				}
 
 				ctx = root.GetComponentInChildren<SceneContext>(true);
-				if (ctx != null) return true;
+				if (ctx != null)
+				{
+					return true;
+				}
 			}
 
 			return false;
@@ -86,30 +120,53 @@ namespace PlatformCore.Services
 		// INTERNAL
 		// -------------------------------------------------------------------
 
-		private UniTask LoadSceneInternal(string sceneName, bool additive, CancellationToken ct)
+		private async UniTask LoadSceneInternal(
+			string sceneName,
+			bool unloadOthers,
+			CancellationToken ct)
 		{
 			if (string.IsNullOrWhiteSpace(sceneName))
+			{
 				throw new ArgumentException("Scene name cannot be null or empty.", nameof(sceneName));
+			}
 
 			var sm = InstanceFinder.SceneManager;
 
-			SceneLoadData data = new(sceneName);
+			_logger.Log($"[FishNetSceneService] Load scene '{sceneName}' (unloadOthers={unloadOthers})");
 
-			if (additive)
+			var data = new SceneLoadData(sceneName);
+
+			if (unloadOthers)
 			{
-				// ADDITIVE GLOBAL SCENE
-				data.ReplaceScenes = ReplaceOption.None;
-				_logger.Log($"[FishNetSceneService] Load ADDITIVE global scene '{sceneName}'");
+				// Выгружаются только online-сцены (а persistent — нет)
+				data.ReplaceScenes = ReplaceOption.OnlineOnly;
 			}
 			else
 			{
-				// BASE SCENE (replace all)
-				data.ReplaceScenes = ReplaceOption.All;
-				_logger.Log($"[FishNetSceneService] Load BASE global scene '{sceneName}'");
+				// Классическая аддитивная загрузка environment-сцен
+				data.ReplaceScenes = ReplaceOption.None;
 			}
 
+			var tcs = new UniTaskCompletionSource();
+
+			void OnLoad(SceneLoadEndEventArgs args)
+			{
+				foreach (var s in args.LoadedScenes)
+				{
+					if (s.name == sceneName)
+					{
+						SceneManager.SetActiveScene(s);
+						sm.OnLoadEnd -= OnLoad;
+						tcs.TrySetResult();
+						return;
+					}
+				}
+			}
+
+			sm.OnLoadEnd += OnLoad;
 			sm.LoadGlobalScenes(data);
-			return UniTask.CompletedTask;
+
+			await tcs.Task.AttachExternalCancellation(ct);
 		}
 	}
 }
