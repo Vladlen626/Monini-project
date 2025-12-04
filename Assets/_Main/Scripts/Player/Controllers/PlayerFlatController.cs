@@ -10,22 +10,22 @@ namespace _Main.Scripts.Player
 	public class PlayerFlatController : IBaseController, IActivatable
 	{
 		private readonly PlayerModel _playerModel;
-		private readonly PlayerView _playerView;
+		private readonly PlayerNetworkBridge _bridge;
 
-		public PlayerFlatController(PlayerModel playerModel, PlayerView playerView)
+		public PlayerFlatController(PlayerModel playerModel, PlayerNetworkBridge bridge)
 		{
 			_playerModel = playerModel;
-			_playerView = playerView;
+			_bridge = bridge;
 		}
 
 		public void Activate()
 		{
-			_playerView.OnSlamReceived += OnSlamReceivedHandler;
+			_bridge.OnSlamReceived += OnSlamReceivedHandler;
 		}
 
 		public void Deactivate()
 		{
-			_playerView.OnSlamReceived -= OnSlamReceivedHandler;
+			_bridge.OnSlamReceived -= OnSlamReceivedHandler;
 		}
 
 		private void OnSlamReceivedHandler()

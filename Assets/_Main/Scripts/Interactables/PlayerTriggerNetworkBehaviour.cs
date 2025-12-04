@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace _Main.Scripts.Location
 {
-	public class NextAreaNetworkBehaviour : NetworkBehaviour
+	public class PlayerTriggerNetworkBehaviour : NetworkBehaviour
 	{
 		public event Action<int> OnPlayerEntered;
 		public event Action<int> OnPlayerExited;
@@ -20,7 +20,16 @@ namespace _Main.Scripts.Location
 			{
 				return;
 			}
+
+			var bridge = other.GetComponent<PlayerNetworkBridge>();
+			if (bridge == null)
+			{
+				return;
+			}
+
+			OnPlayerEntered?.Invoke(bridge.OwnerId);
 			
+			OnPlayerEnterInTrigger(player);
 			OnPlayerEntered?.Invoke(player.OwnerId);
 		}
 
@@ -36,8 +45,17 @@ namespace _Main.Scripts.Location
 			{
 				return;
 			}
-			
+
+			OnPlayerExitTrigger(player);
 			OnPlayerExited?.Invoke(player.OwnerId);
+		}
+
+		protected virtual void OnPlayerEnterInTrigger(NetworkObject playerNetworkObject)
+		{
+		}
+		
+		protected virtual void OnPlayerExitTrigger(NetworkObject playerNetworkObject)
+		{
 		}
 	}
 }

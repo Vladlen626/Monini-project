@@ -5,6 +5,7 @@ using _Main.Scripts.Player;
 using FishNet.Component.Transforming;
 using FishNet.Connection;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
@@ -13,8 +14,13 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerView), typeof(NetworkTransform))]
 public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 {
-	[SerializeField] private GameObject _slamFx;
-	[SerializeField] private SlamTrigger _slamTrigger;
+	[SerializeField] 
+	private GameObject _slamFx;
+	[SerializeField] 
+	private SlamTrigger _slamTrigger;
+
+	public event Action OnSlamReceived;
+	public readonly SyncVar<PlayerState> State = new();
 
 	private PlayerView _view;
 	private NetworkTransform _networkTransform;
@@ -23,10 +29,15 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	{
 		_view = GetComponent<PlayerView>();
 		_networkTransform = GetComponent<NetworkTransform>();
+	}
+
+	public override void OnStartServer()
+	{
+		_slamTrigger.SetupBridge(this);
 		_slamTrigger.OnSlamImpactReceived += OnSlamImpactHandler;
 	}
 
-	private void OnDestroy()
+	public override void OnStopServer()
 	{
 		_slamTrigger.OnSlamImpactReceived -= OnSlamImpactHandler;
 	}
@@ -35,6 +46,7 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	{
 		base.OnStartClient(); 
 		MoveToPersistent(gameObject);
+
 		if (!IsOwner)
 		{
 			return;
@@ -42,16 +54,13 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 
 		var objectFactory = Locator.Resolve<IObjectFactory>();
 		var lifecycle = Locator.Resolve<LifecycleService>();
-
 		var playerFactory = new PlayerFactory();
-
 		var ctx = await PlayerContext.Client.CreateAsync(this, _view, objectFactory, playerFactory,
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);
 		var cam = ctx.Camera.GetCameraTransform();
 		MoveToPersistent(cam.gameObject);
-		_slamTrigger.SetPlayerModel(ctx.Model);
 
 		foreach (var c in ctx.Controllers)
 		{
@@ -69,39 +78,29 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 
 	private void OnSlamImpactHandler(int targetId)
 	{
-		if (!IsOwner)
-		{
-			return;
-		}
-
-		Server_NotifyObjectGetSlamImpact( targetId);
-	}
-	
-	[Server]
-	public void OnSlamImpact()
-	{
-		Target_ApplyFlat(Owner);
-	}
-
-	[TargetRpc]
-	private void Target_ApplyFlat(NetworkConnection target)
-	{
-		_view.OnSlamImpact();
-	}
-
-	[ServerRpc]
-	private void Server_NotifyObjectGetSlamImpact(int targetId)
-	{
 		if (!NetworkManager.ServerManager.Objects.Spawned.TryGetValue(targetId, out var networkObject))
 		{
 			return;
 		}
-		
+
+
 		var slamReceiver = networkObject.GetComponent<ISlamImpactReceiver>();
 		if (slamReceiver != null)
 		{
 			slamReceiver.OnSlamImpact();
 		}
+	}
+
+	public void OnSlamImpact()
+	{
+		OnSlamReceived?.Invoke();
+	}
+	
+	[ServerRpc]
+	public void Server_ChangeState(PlayerState requestedState)
+	{
+		State.Value = requestedState;
+		State.DirtyAll();
 	}
 
 	[ServerRpc(RequireOwnership = true)]

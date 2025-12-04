@@ -4,8 +4,8 @@ namespace _Main.Scripts.Player.StateMachine.States
 {
 	public class PlayerNormalState : PlayerStateBase
 	{
-		public PlayerNormalState(PlayerModel model, PlayerView view, CharacterController cc)
-			: base(model, view, cc) {}
+		public PlayerNormalState(PlayerView view, CharacterController cc)
+			: base(view, cc) {}
 
 		public override void Enter()
 		{

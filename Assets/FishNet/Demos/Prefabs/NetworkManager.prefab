@@ -84,7 +84,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Managing.Debugging.DebugManager
   WriteSceneObjectDetails: 1
-  ValidateRpcLengths: 0
+  ValidateRpcLengths: 1
   DisableObserversRpcLinks: 0
   DisableTargetRpcLinks: 0
   DisableServerRpcLinks: 0

@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using FishNet.Object;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,31 +9,59 @@ namespace _Main.Scripts.Player
 	public class SlamTrigger : MonoBehaviour
 	{
 		public event Action<int> OnSlamImpactReceived;
-		[SerializeField] private NetworkObject _netObject;
 
-		private PlayerModel _playerModel;
-		private bool _active = false;
+		[SerializeField] 
+		private NetworkObject _netObject;
 
-		public void SetPlayerModel(PlayerModel playerModel)
+		private PlayerNetworkBridge _bridge;
+		
+		private Collider _collider;
+
+		private void Awake()
 		{
-			_playerModel = playerModel;
-			_playerModel.OnPlayerStateChanged += OnPlayerStateChangedHandler;
-			_active = true;
+			_collider = GetComponent<Collider>();
 		}
 
-		private void OnPlayerStateChangedHandler(PlayerState playerState)
+		public void SetupBridge(PlayerNetworkBridge bridge)
 		{
-			transform.localScale = playerState == PlayerState.Slam ? Vector3.one : Vector3.zero;
+			_bridge = bridge;
+			_bridge.State.OnChange += OnPlayerStateChangedHandler;
+		}
+
+		private void OnDestroy()
+		{
+			_bridge.State.OnChange -= OnPlayerStateChangedHandler;
+		}
+
+		private void OnPlayerStateChangedHandler(PlayerState playerState, PlayerState next, bool asServer)
+		{
+			if (asServer)
+			{
+				if (next == PlayerState.Slam)
+				{
+					EnableCollider();
+				}
+				else
+				{
+					DisableCollider();
+				}
+			}
+		}
+
+		private void EnableCollider()
+		{
+			_collider.enabled = true;
+		}
+
+		private async void DisableCollider()
+		{
+			await UniTask.WaitForFixedUpdate();
+			_collider.enabled = false;
 		}
 
 		private void OnTriggerEnter(Collider other)
 		{
-			if (!_active)
-			{
-				return;
-			}
-
-			if (_playerModel.State != PlayerState.Slam)
+			if (!_netObject.IsServerStarted)
 			{
 				return;
 			}
@@ -45,6 +74,7 @@ namespace _Main.Scripts.Player
 
 			if (netObject.ObjectId == _netObject.ObjectId)
 			{
+				DebugNet.TryAll("ObjectId = other object id");
 				return;
 			}
 

@@ -12,7 +12,7 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 		private readonly PlayerConfig _config;
 		private readonly PlayerView _view;
 		private readonly Animator _anim;
-		private readonly PlayerModel _playerModel;
+		private readonly PlayerNetworkBridge _bridge;
 
 		// Animator hashes
 		private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -30,13 +30,13 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 		private const float SpeedDamp = 0.1f;
 		private const float YVelDamp = 0.1f;
 
-		public PlayerAnimationController(IInputService input, PlayerConfig config, PlayerView view, PlayerModel playerModel)
+		public PlayerAnimationController(IInputService input, PlayerConfig config, PlayerView view, PlayerNetworkBridge bridge)
 		{
 			_input = input;
 			_config = config;
 			_view = view;
 			_anim = view.Animator;
-			_playerModel = playerModel;
+			_bridge = bridge;
 		}
 
 		public void OnUpdate(float dt)
@@ -80,7 +80,7 @@ namespace _Main.Scripts.CameraFX._Main.Scripts.Player
 				_anim.SetTrigger(LandHash);
 			}
 			
-			_anim.SetBool(FlatHash, _playerModel.State == PlayerState.Flat);
+			_anim.SetBool(FlatHash, _bridge.State.Value == PlayerState.Flat);
 
 			_wasGrounded = grounded;
 		}

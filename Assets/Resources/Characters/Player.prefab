@@ -56,7 +56,6 @@ MonoBehaviour:
   _cameraRoot: {fileID: 7969558339020748320}
   _playerVisualTransform: {fileID: 8337648142941129352}
   _animator: {fileID: 3680816188755162215}
-  _slamTrigger: {fileID: 8400118657877396442}
   _rotateSpeedDeg: 720
 --- !u!114 &84698842872096416
 MonoBehaviour:
@@ -376,7 +375,7 @@ Transform:
   m_GameObject: {fileID: 8321761868436017086}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -395,7 +394,7 @@ SphereCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4031
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0

@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using _Main.Scripts.Player;
 using _Main.Scripts.Player.StateMachine.States;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerStateMachine
@@ -11,20 +13,16 @@ public class PlayerStateMachine
 
 	private PlayerStateBase _current;
 
-	public PlayerStateMachine(PlayerModel model, PlayerView view, CharacterController cc)
+	public PlayerStateMachine(PlayerView view, CharacterController cc)
 	{
-		_normal = new PlayerNormalState(model, view, cc);
-		_slam = new PlayerSlamState(model, view, cc);
-		_flat = new PlayerFlatState(model, view, cc);
+		_normal = new PlayerNormalState(view, cc);
+		_slam = new PlayerSlamState(view, cc);
+		_flat = new PlayerFlatState(view, cc);
 	}
 
-	public void HandleStateChange(PlayerState state)
+	public void ChangeState(PlayerState state)
 	{
 		var newState = ResolveState(state);
-		if (newState == _current)
-		{
-			return;
-		}
 
 		_current?.Exit();
 

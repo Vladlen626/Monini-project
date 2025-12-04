@@ -22,8 +22,6 @@ namespace _Main.Scripts.Player
 		public float brakingBoost = 2.0f;
 		public float apexHangThreshold = 1.0f;
 		public float apexHangScale = 0.9f;
-		public float groundSnapDistance = 0.3f;
-		public float maxSnapSlope = 55f;
 		public float minRotateSpeed = 480f;
 		public float maxRotateSpeed = 1080f;
 	}

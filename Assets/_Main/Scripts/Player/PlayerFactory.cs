@@ -10,24 +10,30 @@ namespace _Main.Scripts.Player
 	public class PlayerFactory
 	{
 		public IBaseController[] GetPlayerBaseControllers(
-			PlayerModel model,
+			PlayerNetworkBridge bridge,
 			PlayerView view,
 			IInputService input,
 			ICameraService camera)
 		{
-			var movementController =
-				new PlayerMovementController(input, model.config, view, camera.GetCameraTransform(), model);
-			var charController = view.GetComponent<CharacterController>();
-			var stateMachine = new PlayerStateMachine(model, view, charController);
-			
+			var config = new PlayerConfig();
+			var movementController = new PlayerMovementController(input, config, view, camera.GetCameraTransform(), bridge);
+			var clientStateController = new ClientPlayerStateController(bridge, view);
 			return new IBaseController[]
 			{
 				movementController,
-				new PlayerStateController(model, stateMachine),
-				new PlayerFlatController(model, view),
-				new PlayerSlamBounceController(input, movementController, view, camera, model),
+				clientStateController,
+				new PlayerSlamBounceController(input, movementController, view, camera, config, clientStateController),
 				new PlayerCameraController(camera, input, view),
-				new PlayerAnimationController(input, model.config, view, model),
+				new PlayerAnimationController(input, config, view, bridge),
+			};
+		}
+
+		public IBaseController[] GetPlayerServerControllers(PlayerContext.Server context)
+		{
+			return new IBaseController[]
+			{
+				new ServerPlayerStateController(context),
+				new PlayerFlatController(context.Model, context.Bridge),
 			};
 		}
 	}

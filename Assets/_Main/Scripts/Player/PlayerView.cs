@@ -8,7 +8,6 @@ public class PlayerView : MonoBehaviour
 	[SerializeField] private Transform _cameraRoot;
 	[SerializeField] private Transform _playerVisualTransform;
 	[SerializeField] private Animator _animator;
-	[SerializeField] private Collider _slamTrigger;
 	[SerializeField] private float _rotateSpeedDeg = 720f;
 
 	private PlayerNetworkBridge _bridge;
@@ -19,7 +18,6 @@ public class PlayerView : MonoBehaviour
 	public Vector3 Velocity => _characterController.velocity;
 	public Animator Animator => _animator;
 	public event Action OnLand;
-	public event Action OnSlamReceived;
 
 	private bool _wasGrounded;
 
@@ -75,14 +73,6 @@ public class PlayerView : MonoBehaviour
 		_wasGrounded = _characterController != null && _characterController.isGrounded;
 	}
 
-	public void ResetGroundState()
-	{
-		if (_characterController != null)
-		{
-			_wasGrounded = _characterController.isGrounded;
-		}
-	}
-
 	public void SetRotateSpeed(float degPerSec)
 	{
 		_rotateSpeedDeg = degPerSec;
@@ -101,10 +91,5 @@ public class PlayerView : MonoBehaviour
 	public void NotifySlamImpact()
 	{
 		_bridge.Server_PlaySlamFX(Position);
-	}
-
-	public void OnSlamImpact()
-	{
-		OnSlamReceived?.Invoke();
 	}
 }

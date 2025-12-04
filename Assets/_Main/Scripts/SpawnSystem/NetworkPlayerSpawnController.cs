@@ -184,7 +184,12 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 		var view = nob.GetComponent<PlayerView>();
 		var bridge = nob.GetComponent<PlayerNetworkBridge>();
-		var serverCtx = PlayerContext.Server.Create(clientId, view, bridge);
+		var serverCtx = PlayerContext.Server.Create(clientId, view, bridge, _playerFactory);
+		
+		foreach (var serverCtxController in serverCtx.Controllers)
+		{
+			await _lifecycle.RegisterAsync(serverCtxController);
+		}
 
 		_ownerContexts[clientId] = serverCtx;
 	}

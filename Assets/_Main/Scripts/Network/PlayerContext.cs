@@ -11,7 +11,6 @@ using PlatformCore.Services.Factory;
 public abstract class PlayerContext : IDisposable
 {
 	public PlayerView View { get; protected set; }
-	public PlayerModel Model { get; protected set; }
 	public PlayerNetworkBridge Bridge { get; private set; }
 	public List<IBaseController> Controllers { get; protected set; } = new();
 
@@ -39,11 +38,10 @@ public abstract class PlayerContext : IDisposable
 		public static async UniTask<Client> CreateAsync(PlayerNetworkBridge bridge,
 			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
 		{
-			var ctx = new Client
+			var context = new Client
 			{
 				View = view,
-				Bridge = bridge,
-				Model = new PlayerModel()
+				Bridge = bridge
 			};
 
 			var input = new InputLocalService();
@@ -52,17 +50,17 @@ public abstract class PlayerContext : IDisposable
 			await input.InitAsync(ct);
 			await camera.InitAsync(ct);
 
-			ctx._locals.Add(input);
-			ctx._locals.Add(camera);
+			context._locals.Add(input);
+			context._locals.Add(camera);
 
-			ctx.Input = input;
-			ctx.Camera = camera;
+			context.Input = input;
+			context.Camera = camera;
 
-			ctx.Controllers.AddRange(
-				playerFactory.GetPlayerBaseControllers(ctx.Model, view, input, camera)
+			context.Controllers.AddRange(
+				playerFactory.GetPlayerBaseControllers(context.Bridge, view, input, camera)
 			);
 
-			return ctx;
+			return context;
 		}
 
 		public override void Dispose()
@@ -76,6 +74,7 @@ public abstract class PlayerContext : IDisposable
 	// ========= SERVER =========
 	public sealed class Server : PlayerContext
 	{
+		public PlayerModel Model { get; private set; }
 		public int OwnerId { get; private set; }
 
 		private Server() { }
@@ -83,9 +82,10 @@ public abstract class PlayerContext : IDisposable
 		public static Server Create(
 			int ownerId,
 			PlayerView view,
-			PlayerNetworkBridge bridge)
+			PlayerNetworkBridge bridge,
+			PlayerFactory playerFactory)
 		{
-			var ctx = new Server
+			var context = new Server
 			{
 				OwnerId = ownerId,
 				View = view,
@@ -93,7 +93,9 @@ public abstract class PlayerContext : IDisposable
 				Model = new PlayerModel()
 			};
 
-			return ctx;
+			context.Controllers.AddRange(playerFactory.GetPlayerServerControllers(context));
+
+			return context;
 		}
 	}
 }

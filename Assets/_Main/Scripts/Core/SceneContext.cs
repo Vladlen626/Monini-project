@@ -1,5 +1,5 @@
-﻿using System;
-using _Main.Scripts.Core;
+﻿using _Main.Scripts.Core;
+using _Main.Scripts.Interactables.Crumb;
 using _Main.Scripts.Location;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,6 +13,9 @@ public class SceneContext : MonoBehaviour
 
 	[SerializeField] 
 	private NextAreaNetworkBehaviour[] _nextAreaNetworkBehaviours;
+	
+	[SerializeField] 
+	private CrumbPlayerTrigger[] _crumbsNetworkBehaviours;
 
 	[SerializeField, SceneName]
 	private string _nextSceneName;

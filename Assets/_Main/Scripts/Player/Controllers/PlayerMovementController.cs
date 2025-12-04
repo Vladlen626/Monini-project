@@ -14,7 +14,6 @@ namespace _Main.Scripts.Player
 		private readonly IAudioService _audioService;
 		private readonly PlayerConfig _playerConfig;
 		private readonly PlayerView _playerView;
-		private readonly PlayerModel _playerModel;
 		private readonly Transform _cameraTransform;
 
 		private bool _isGrounded;
@@ -42,14 +41,13 @@ namespace _Main.Scripts.Player
 		private PlayerNetworkBridge _bridge;
 
 		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, PlayerView playerView,
-			Transform cameraTransform, PlayerModel playerModel)
+			Transform cameraTransform, PlayerNetworkBridge bridge)
 		{
 			_cameraTransform = cameraTransform;
 			_inputService = inputService;
 			_playerConfig = playerConfig;
 			_playerView = playerView;
-			_playerModel = playerModel;
-			_bridge = playerView.GetComponent<PlayerNetworkBridge>();
+			_bridge = bridge;
 		}
 
 		public void OnUpdate(float deltaTime)
@@ -59,7 +57,7 @@ namespace _Main.Scripts.Player
 				return;
 			}
 
-			if (_playerModel.State == PlayerState.Flat)
+			if (_bridge.State.Value is PlayerState.Flat)
 			{
 				return;
 			}
@@ -111,6 +109,10 @@ namespace _Main.Scripts.Player
 
 			// === Ввод и базовое желаемое направление (камеро-ориентированное) ===
 			Vector2 in2 = _inputService.Move;
+			if (_bridge.State.Value == PlayerState.Slam)
+			{
+				in2 = Vector2.zero;;
+			}
 
 			_cameraForward.y = 0f;
 			float forwardMag = _cameraForward.sqrMagnitude;

@@ -3,16 +3,13 @@ using UnityEngine;
 
 public abstract class PlayerStateBase
 {
-	protected readonly PlayerModel Model;
 	protected readonly PlayerView View;
 	protected readonly CharacterController CC;
 
 	protected PlayerStateBase(
-		PlayerModel model,
 		PlayerView view,
 		CharacterController cc)
 	{
-		Model = model;
 		View = view;
 		CC = cc;
 	}
