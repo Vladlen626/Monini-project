@@ -9,13 +9,11 @@ namespace _Main.Scripts.Player.StateMachine.States
 
 		public override void Enter()
 		{
-			DebugNet.TryAll("Entering PlayerSlamState");
 			CC.excludeLayers = LayerMask.GetMask("SlamReceiver", "Player");
 		}
 
 		public override void Exit()
 		{
-			DebugNet.TryAll("Exeting PlayerSlamState");
 			CC.excludeLayers = 0;
 		}
 	}

@@ -74,7 +74,6 @@ namespace _Main.Scripts.Player
 
 			if (netObject.ObjectId == _netObject.ObjectId)
 			{
-				DebugNet.TryAll("ObjectId = other object id");
 				return;
 			}
 

@@ -26,7 +26,6 @@ public class BreakOnSlam : NetworkBehaviour, ISlamImpactReceiver
 
 	private void Destruct()
 	{
-		DebugNet.TryAll("BOX BROKEN");
 		boxCollider.enabled = false;
 		Rpc_SpawnBreakFx();
 		DespawnOnNextFrame().Forget();
@@ -44,7 +43,6 @@ public class BreakOnSlam : NetworkBehaviour, ISlamImpactReceiver
 	[ObserversRpc]
 	private void Rpc_SpawnBreakFx()
 	{
-		DebugNet.TryAll("box break fx");
 		if (_breakFx)
 		{
 			Instantiate(_breakFx, transform.position, Quaternion.identity);

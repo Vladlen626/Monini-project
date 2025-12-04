@@ -32,13 +32,13 @@ namespace _Main.Scripts.Player
 			public float DiveExtra = -48f;
 
 			public float ImpactRadius = 1f;
-			public float DelayAfterImact = 0.75f;
+			public float DelayAfterImact = 0.075f;
 
 			public float AfterImpactCooldown = 0.65f;
 			public float SuppressJumpTime = 0.15f;
 
 			public float ForwardBoost = 5.5f;
-			public float ShakeAmp = 1.1f, ShakeDur = 0.25f;
+			public float ShakeAmp = 1.1f, ShakeDur = 0.15f;
 			public string AudioImpact = "event:/ground_slam_impact";
 		}
 
