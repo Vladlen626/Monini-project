@@ -14,7 +14,7 @@ namespace _Main.Scripts.Player.Network
 		private readonly ILoggerService _logger;
 		private readonly INetworkService _network;
 		private readonly ISceneFlowService _sceneFlow;
-		private readonly GameModelContext _model;
+		private readonly GameModelContext _modelContext;
 		private readonly LifecycleService _lifecycle;
 		private readonly NetworkPlayerSpawnController _spawn;
 
@@ -25,10 +25,10 @@ namespace _Main.Scripts.Player.Network
 
 		public GameFlowController(
 			ServiceLocator services,
-			GameModelContext model,
+			GameModelContext modelContext,
 			NetworkPlayerSpawnController spawn)
 		{
-			_model = model;
+			_modelContext = modelContext;
 			_spawn = spawn;
 
 			_sceneService = services.Get<ISceneService>();
@@ -91,7 +91,7 @@ namespace _Main.Scripts.Player.Network
 				return;
 			}
 
-			_model.SceneContext = context;
+			_modelContext.SetSceneContext(context);
 
 			foreach (var ctrl in _sceneControllers)
 			{
@@ -102,7 +102,7 @@ namespace _Main.Scripts.Player.Network
 
 			foreach (var area in context.NextAreaNetworkBehaviours)
 			{
-				var controller = new NetworkPlayerNextAreaController(area, _network, _sceneFlow, _model);
+				var controller = new NetworkPlayerNextAreaController(area, _network, _sceneFlow, _modelContext);
 				await _lifecycle.RegisterAsync(controller);
 				_sceneControllers.Add(controller);
 			}

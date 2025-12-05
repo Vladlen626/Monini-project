@@ -13,11 +13,10 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	private readonly INetworkService _networkService;
 	private readonly INetworkConnectionEvents _connection;
 	private readonly INetworkObjectFactory _objectFactory;
-	private readonly PlayerFactory _playerFactory;
 	private readonly LifecycleService _lifecycle;
 	private readonly GameModelContext _gameModelContext;
-
-	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
+	private NetworkModel _networkModel => _gameModelContext.NetworkModel;
+	
 	private readonly HashSet<int> _connectedClientIds = new();
 
 	public NetworkPlayerSpawnController(
@@ -25,21 +24,17 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		INetworkConnectionEvents connectionEvents,
 		IObjectFactory objectFactory,
 		LifecycleService lifecycle,
-		GameModelContext gameModelContext,
-		PlayerFactory playerFactory)
+		GameModelContext gameModelContext)
 	{
 		_networkService = networkService;
 		_connection = connectionEvents;
 		_objectFactory = objectFactory as INetworkObjectFactory;
 		_lifecycle = lifecycle;
 		_gameModelContext = gameModelContext;
-		_playerFactory = playerFactory;
 	}
 
 	public void Activate()
 	{
-		_connection.OnLocalClientDisconnected += OnLocalClientDisconnected;
-
 		_connection.OnRemoteClientConnected += OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected += OnRemoteClientDisconnected;
 
@@ -48,32 +43,10 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 	public void Deactivate()
 	{
-		_connection.OnLocalClientDisconnected -= OnLocalClientDisconnected;
-
 		_connection.OnRemoteClientConnected -= OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected -= OnRemoteClientDisconnected;
 
 		_connection.OnRemoteClientLoadedStartScenes -= OnRemoteClientLoadedStartScenes;
-	}
-
-	// ========================
-	// CLIENT EVENTS
-	// ========================
-
-	private void OnLocalClientDisconnected()
-	{
-		foreach (var ctx in _ownerContexts.Values)
-		{
-			foreach (var c in ctx.Controllers)
-			{
-				_lifecycle.Unregister(c);
-			}
-
-			ctx.Dispose();
-		}
-
-		_ownerContexts.Clear();
-		_connectedClientIds.Clear();
 	}
 
 	// ========================
@@ -94,7 +67,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	{
 		_connectedClientIds.Remove(clientId);
 
-		if (_ownerContexts.TryGetValue(clientId, out var ctx))
+		if (_networkModel.ownerContexts.TryGetValue(clientId, out var ctx))
 		{
 			foreach (var c in ctx.Controllers)
 			{
@@ -102,7 +75,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			}
 
 			ctx.Dispose();
-			_ownerContexts.Remove(clientId);
+			_networkModel.RemovePlayerContext(clientId);
 		}
 	}
 
@@ -134,7 +107,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 		foreach (int clientId in _connectedClientIds)
 		{
-			if (!_ownerContexts.ContainsKey(clientId))
+			if (!_networkModel.ownerContexts.ContainsKey(clientId))
 			{
 				await SpawnPlayerForCurrentScene(clientId);
 			}
@@ -148,7 +121,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		if (_ownerContexts.ContainsKey(clientId))
+		if (_networkModel.ownerContexts.ContainsKey(clientId))
 		{
 			return;
 		}
@@ -184,14 +157,14 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 		var view = nob.GetComponent<PlayerView>();
 		var bridge = nob.GetComponent<PlayerNetworkBridge>();
-		var serverCtx = PlayerContext.Server.Create(clientId, view, bridge, _playerFactory);
+		var serverCtx = PlayerContext.Server.Create(clientId, view, bridge);
 		
 		foreach (var serverCtxController in serverCtx.Controllers)
 		{
 			await _lifecycle.RegisterAsync(serverCtxController);
 		}
 
-		_ownerContexts[clientId] = serverCtx;
+		_networkModel.AddPlayerContext(clientId, serverCtx);
 	}
 
 	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)
@@ -206,7 +179,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			return;
 		}
 
-		foreach (var kvp in _ownerContexts)
+		foreach (var kvp in _networkModel.ownerContexts)
 		{
 			int clientId = kvp.Key;
 			var ctx = kvp.Value;

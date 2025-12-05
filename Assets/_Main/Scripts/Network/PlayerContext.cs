@@ -36,7 +36,7 @@ public abstract class PlayerContext : IDisposable
 		}
 
 		public static async UniTask<Client> CreateAsync(PlayerNetworkBridge bridge,
-			PlayerView view, IObjectFactory factory, PlayerFactory playerFactory, CancellationToken ct)
+			PlayerView view, IObjectFactory factory, CancellationToken ct)
 		{
 			var context = new Client
 			{
@@ -57,7 +57,7 @@ public abstract class PlayerContext : IDisposable
 			context.Camera = camera;
 
 			context.Controllers.AddRange(
-				playerFactory.GetPlayerBaseControllers(context.Bridge, view, input, camera)
+				PlayerControllersFactory.GetPlayerBaseControllers(context.Bridge, view, input, camera)
 			);
 
 			return context;
@@ -82,8 +82,7 @@ public abstract class PlayerContext : IDisposable
 		public static Server Create(
 			int ownerId,
 			PlayerView view,
-			PlayerNetworkBridge bridge,
-			PlayerFactory playerFactory)
+			PlayerNetworkBridge bridge)
 		{
 			var context = new Server
 			{
@@ -93,7 +92,7 @@ public abstract class PlayerContext : IDisposable
 				Model = new PlayerModel()
 			};
 
-			context.Controllers.AddRange(playerFactory.GetPlayerServerControllers(context));
+			context.Controllers.AddRange(PlayerControllersFactory.GetPlayerServerControllers(context));
 
 			return context;
 		}

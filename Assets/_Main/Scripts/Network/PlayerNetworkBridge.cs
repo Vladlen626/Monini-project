@@ -54,8 +54,7 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 
 		var objectFactory = Locator.Resolve<IObjectFactory>();
 		var lifecycle = Locator.Resolve<LifecycleService>();
-		var playerFactory = new PlayerFactory();
-		var ctx = await PlayerContext.Client.CreateAsync(this, _view, objectFactory, playerFactory,
+		var ctx = await PlayerContext.Client.CreateAsync(this, _view, objectFactory,
 			CancellationToken.None);
 
 		ctx.Camera.AttachTo(ctx.View.CameraRoot);

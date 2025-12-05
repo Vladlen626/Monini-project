@@ -1,4 +1,5 @@
 using _Main.Scripts.Core.Services;
+using _Main.Scripts.Interactables.Crumb.Controllers;
 using _Main.Scripts.Player;
 using _Main.Scripts.Player.Network;
 using Cysharp.Threading.Tasks;
@@ -66,21 +67,20 @@ namespace _Main.Scripts.Core
 			await UniTask.WaitUntil(() => network.IsServerStarted);
 
 			cursor.UnlockCursor();
-			var playerFactory = new PlayerFactory();
 			var networkConnectionController = new NetworkConnectionController();
 			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,
-				objectFactory, _lifecycle, gameModelContext, playerFactory);
+				objectFactory, _lifecycle, gameModelContext);
 
 			var gameFlowController = new GameFlowController(_serviceLocator, gameModelContext, networkSpawnController);
 
-			var controllersArray = new IBaseController[]
+			var baseControllers = new IBaseController[]
 			{
 				networkConnectionController,
 				networkSpawnController,
 				gameFlowController
 			};
 
-			foreach (var controller in controllersArray)
+			foreach (var controller in baseControllers)
 			{
 				await _lifecycle.RegisterAsync(controller);
 			}

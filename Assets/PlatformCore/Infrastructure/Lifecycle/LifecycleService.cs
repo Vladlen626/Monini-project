@@ -10,7 +10,7 @@ namespace PlatformCore.Infrastructure.Lifecycle
 		private readonly List<IUpdatable> _updatables = new List<IUpdatable>();
 		private readonly List<IFixedUpdatable> _fixedUpdatables = new List<IFixedUpdatable>();
 		private readonly List<ILateUpdatable> _lateUpdatables = new List<ILateUpdatable>();
-
+		
 		public async UniTask RegisterAsync(object obj)
 		{
 			if (obj == null)

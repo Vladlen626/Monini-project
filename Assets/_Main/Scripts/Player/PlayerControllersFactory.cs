@@ -3,13 +3,12 @@ using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player.Controllers;
 using PlatformCore.Core;
 using PlatformCore.Services;
-using UnityEngine;
 
 namespace _Main.Scripts.Player
 {
-	public class PlayerFactory
+	public static class PlayerControllersFactory
 	{
-		public IBaseController[] GetPlayerBaseControllers(
+		public static IBaseController[] GetPlayerBaseControllers(
 			PlayerNetworkBridge bridge,
 			PlayerView view,
 			IInputService input,
@@ -28,7 +27,7 @@ namespace _Main.Scripts.Player
 			};
 		}
 
-		public IBaseController[] GetPlayerServerControllers(PlayerContext.Server context)
+		public static IBaseController[] GetPlayerServerControllers(PlayerContext.Server context)
 		{
 			return new IBaseController[]
 			{

@@ -31,8 +31,3 @@ public class SceneContext : MonoBehaviour
 		_sceneName = SceneManager.GetActiveScene().name;
 	}
 }
-
-public class GameModelContext
-{
-	public SceneContext SceneContext;
-}

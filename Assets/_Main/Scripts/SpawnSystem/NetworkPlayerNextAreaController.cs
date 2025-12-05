@@ -10,7 +10,7 @@ namespace _Main.Scripts.Player.Network
 {
 	public class NetworkPlayerNextAreaController : IBaseController, IActivatable, IUpdatable
 	{
-		private const float RequiredTime = 5f;
+		private const float RequiredTime = 3f;
 
 		private readonly NextAreaNetworkBehaviour _nextAreaNetworkBehaviour;
 		private readonly INetworkService _networkService;
