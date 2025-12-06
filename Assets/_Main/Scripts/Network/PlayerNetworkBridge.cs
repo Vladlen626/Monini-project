@@ -14,13 +14,17 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerView), typeof(NetworkTransform))]
 public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 {
+	public event Action OnSlamReceived;
+	public event Action<int> OnClientInitialized;
+
 	[SerializeField] 
 	private GameObject _slamFx;
 	[SerializeField] 
 	private SlamTrigger _slamTrigger;
 
-	public event Action OnSlamReceived;
+	
 	public readonly SyncVar<PlayerState> State = new();
+	public readonly SyncVar<int> CrumbsCount = new();
 
 	private PlayerView _view;
 	private NetworkTransform _networkTransform;
@@ -46,25 +50,6 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	{
 		base.OnStartClient(); 
 		MoveToPersistent(gameObject);
-
-		if (!IsOwner)
-		{
-			return;
-		}
-
-		var objectFactory = Locator.Resolve<IObjectFactory>();
-		var lifecycle = Locator.Resolve<LifecycleService>();
-		var ctx = await PlayerContext.Client.CreateAsync(this, _view, objectFactory,
-			CancellationToken.None);
-
-		ctx.Camera.AttachTo(ctx.View.CameraRoot);
-		var cam = ctx.Camera.GetCameraTransform();
-		MoveToPersistent(cam.gameObject);
-
-		foreach (var c in ctx.Controllers)
-		{
-			await lifecycle.RegisterAsync(c);
-		}
 	}
 	private void MoveToPersistent(GameObject gameObjectToMove)
 	{

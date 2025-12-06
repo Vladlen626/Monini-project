@@ -1,4 +1,5 @@
 using _Main.Scripts.Core.Services;
+using _Main.Scripts.Player.Controllers;
 using _Main.Scripts.Player.Network;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
@@ -68,13 +69,12 @@ namespace _Main.Scripts.Core
 			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,
 				objectFactory, _lifecycle, gameModelContext);
 
-			var gameFlowController = new GameFlowController(_serviceLocator, gameModelContext, networkSpawnController);
-
 			var baseControllers = new IBaseController[]
 			{
 				networkConnectionController,
 				networkSpawnController,
-				gameFlowController
+				new GameFlowController(_serviceLocator, gameModelContext, networkSpawnController),
+				new PlayerClientInitController(networkConnectionController, objectFactory, _lifecycle),
 			};
 
 			foreach (var controller in baseControllers)

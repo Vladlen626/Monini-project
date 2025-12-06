@@ -11,23 +11,21 @@ namespace PlatformCore.Services.UI
 
 		public UICanvasType CanvasType => _canvasType;
 
-		public virtual UniTask OnShowAsync(float duration, CancellationToken ct)
+		public void Show()
 		{
 			OnShow();
-			return UniTask.CompletedTask;
 		}
 
-		public virtual UniTask OnHideAsync(float duration, CancellationToken ct)
+		public void Hide()
 		{
 			OnHide();
-			return UniTask.CompletedTask;
 		}
 
-		public virtual void OnShow()
+		protected virtual void OnShow()
 		{
 		}
 
-		public virtual void OnHide()
+		protected virtual void OnHide()
 		{
 		}
 	}

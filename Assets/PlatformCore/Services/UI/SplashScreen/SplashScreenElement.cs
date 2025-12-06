@@ -9,14 +9,14 @@ namespace PlatformCore.Services.UI.SplashScreen
 	{
 		[SerializeField] private CanvasGroup _canvasGroup;
 
-		public override async UniTask OnShowAsync(float duration, CancellationToken ct)
+		public void OnShow(float duration)
 		{
-			await _canvasGroup.DOFade(1, duration).AsyncWaitForCompletion();
+			_canvasGroup.DOFade(1, duration);
 		}
 
-		public override async UniTask OnHideAsync(float duration, CancellationToken ct)
+		public void OnHide(float duration)
 		{
-			await _canvasGroup.DOFade(0, duration).AsyncWaitForCompletion();
+			_canvasGroup.DOFade(0, duration);
 		}
 	}
 }

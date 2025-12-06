@@ -39,11 +39,13 @@ namespace PlatformCore.Services.UI
 		}
 
 		// === SHOW ===
-		public async UniTask<T> ShowAsync<T>(float duration) where T : BaseUIElement
+		public T GetWindow<T>() where T : BaseUIElement
 		{
 			var type = typeof(T);
 			if (!_windows.TryGetValue(type, out var window))
-				window = await LoadAsync<T>(_token);
+			{
+				_logger?.LogError($"[UIService] Please preload before show: {type.Name}");
+			}
 
 			if (window == null)
 			{
@@ -52,33 +54,7 @@ namespace PlatformCore.Services.UI
 			}
 
 			window.gameObject.SetActive(true);
-			await window.OnShowAsync(duration, _token);
 			return (T)window;
-		}
-
-		// === HIDE ===
-		public async UniTask HideAsync<T>(float duration) where T : BaseUIElement
-		{
-			if (!_windows.TryGetValue(typeof(T), out var window) || window == null)
-				return;
-
-			await window.OnHideAsync(duration, _token);
-			window.gameObject.SetActive(false);
-		}
-
-		public void Hide<T>() where T : BaseUIElement
-		{
-			if (_windows.TryGetValue(typeof(T), out var window) && window != null)
-			{
-				window.OnHide();
-				window.gameObject.SetActive(false);
-			}
-		}
-
-		// === STATE ===
-		public T Get<T>() where T : BaseUIElement
-		{
-			return _windows.TryGetValue(typeof(T), out var window) ? window as T : null;
 		}
 
 		public bool IsShowed<T>() where T : BaseUIElement
@@ -90,7 +66,7 @@ namespace PlatformCore.Services.UI
 		public async UniTask PreloadAsync<T>() where T : BaseUIElement
 		{
 			var type = typeof(T);
-			if (_windows.ContainsKey(type))
+			if (_windows.TryGetValue(type, out var window))
 				return;
 
 			await LoadAsync<T>(_token);
@@ -102,7 +78,7 @@ namespace PlatformCore.Services.UI
 			if (!_windows.TryGetValue(type, out var window))
 				return;
 
-			window.OnHide();
+			window.Hide();
 			Object.Destroy(window.gameObject);
 			_windows.Remove(type);
 			_logger?.Log($"[UIService] Unloaded window: {type.Name}");

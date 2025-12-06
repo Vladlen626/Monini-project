@@ -3,6 +3,7 @@ using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player.Controllers;
 using PlatformCore.Core;
 using PlatformCore.Services;
+using PlatformCore.Services.UI;
 
 namespace _Main.Scripts.Player
 {
@@ -17,6 +18,8 @@ namespace _Main.Scripts.Player
 			var config = new PlayerConfig();
 			var movementController = new PlayerMovementController(input, config, view, camera.GetCameraTransform(), bridge);
 			var clientStateController = new ClientPlayerStateController(bridge, view);
+			var uiService = Locator.Resolve<IUIService>();
+
 			return new IBaseController[]
 			{
 				movementController,
@@ -24,6 +27,8 @@ namespace _Main.Scripts.Player
 				new PlayerSlamBounceController(input, movementController, view, camera, config, clientStateController),
 				new PlayerCameraController(camera, input, view),
 				new PlayerAnimationController(input, config, view, bridge),
+				new PlayerDynamicContextController<UIPlayerDynamicHud>(uiService, bridge),
+				new PlayerStaticContextController<UIPlayerStaticHud>(uiService, bridge),
 			};
 		}
 
@@ -31,7 +36,7 @@ namespace _Main.Scripts.Player
 		{
 			return new IBaseController[]
 			{
-				new ServerPlayerStateController(context),
+				new ServerPlayerSyncController(context),
 				new PlayerFlatController(context.Model, context.Bridge),
 			};
 		}

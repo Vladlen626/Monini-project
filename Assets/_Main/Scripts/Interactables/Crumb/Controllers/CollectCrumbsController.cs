@@ -41,9 +41,9 @@ namespace _Main.Scripts.Interactables.Crumb.Controllers
 
 		private void PlayerEnteredCrumbHandler(int objectId, int playerId)
 		{
-			_networkService.Despawn(_crumbPlayerTriggers[objectId]);
-			NetworkModel.ownerContexts[playerId].Model.CollectCrumbs();
-			DebugNet.TryAll($"Player {playerId} collected crumb {objectId}");
+			var crumb = _crumbPlayerTriggers[objectId];
+			NetworkModel.ownerContexts[playerId].Model.CollectCrumbs(crumb.CrumbsValue);
+			_networkService.Despawn(crumb);
 		}
 		
 	}

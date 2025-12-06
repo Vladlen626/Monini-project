@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace _Main.Scripts.Player.Controllers
 {
-	public class ServerPlayerStateController : IBaseController, IActivatable
+	public class ServerPlayerSyncController : IBaseController, IActivatable
 	{
 		private readonly PlayerModel _model;
 		private readonly PlayerStateMachine _machine;
 		private readonly PlayerNetworkBridge _bridge;
 
-		public ServerPlayerStateController(PlayerContext.Server context)
+		public ServerPlayerSyncController(PlayerContext.Server context)
 		{
 			_model = context.Model;
 			_bridge = context.Bridge;
@@ -21,17 +21,24 @@ namespace _Main.Scripts.Player.Controllers
 		public void Activate()
 		{
 			_bridge.State.OnChange += OnStateChangedHandler;
+			_model.OnCrumbValueChanged += OnCrumbValueChanged;
 		}
 
 		public void Deactivate()
 		{
 			_bridge.State.OnChange -= OnStateChangedHandler;
+			_model.OnCrumbValueChanged -= OnCrumbValueChanged;
 		}
 
 		private void OnStateChangedHandler(PlayerState state, PlayerState next, bool asServer)
 		{
 			_machine.ChangeState(next);
 			_model.SetState(next);
+		}
+
+		private void OnCrumbValueChanged(int crumbsValue)
+		{
+			_bridge.CrumbsCount.Value = crumbsValue;
 		}
 	}
 }

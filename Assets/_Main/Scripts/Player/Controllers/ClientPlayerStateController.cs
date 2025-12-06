@@ -1,5 +1,4 @@
 ﻿using PlatformCore.Core;
-using PlatformCore.Infrastructure.Lifecycle;
 using UnityEngine;
 
 namespace _Main.Scripts.Player.Controllers

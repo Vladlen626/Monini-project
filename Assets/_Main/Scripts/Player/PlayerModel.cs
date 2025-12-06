@@ -1,12 +1,14 @@
 ﻿using System;
+using FishNet.Object.Synchronizing;
 
 namespace _Main.Scripts.Player
 {
 	public class PlayerModel
 	{
-		public int crumbsCount { get; private set; }
 		public event Action<PlayerState> OnPlayerStateChanged;
+		public event Action<int> OnCrumbValueChanged;
 		public PlayerState State { get; private set; } = PlayerState.Normal;
+		public int crumbsCount { get; private set; }
 
 		public void SetState(PlayerState newState)
 		{
@@ -18,9 +20,16 @@ namespace _Main.Scripts.Player
 			State = newState;
 			OnPlayerStateChanged?.Invoke(newState);
 		}
-		public void CollectCrumbs()
+		public void CollectCrumbs(int crumbsNum)
 		{
-			crumbsCount++;
+			crumbsCount += crumbsNum;
+			OnCrumbValueChanged?.Invoke(crumbsCount);
+		}
+
+		public void SpendCrumbs(int crumbsNum)
+		{
+			crumbsCount -= crumbsNum;
+			OnCrumbValueChanged?.Invoke(crumbsCount);
 		}
 	}
 }
