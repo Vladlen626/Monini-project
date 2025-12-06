@@ -68,6 +68,7 @@ namespace _Main.Scripts.Player.Network
 			_isChangingScene = true;
 			_logger.Log($"[GameFlow] Load environment: {sceneName}");
 
+			// Setup scene
 			if (!string.IsNullOrEmpty(_currentEnvironmentScene))
 			{
 				var persistent = SceneManager.GetSceneByName(SceneNames.PersistentScene);
@@ -84,6 +85,7 @@ namespace _Main.Scripts.Player.Network
 			
 			await UniTask.Yield();
 			
+			// Get scene context
 			if (!_sceneService.TryGetSceneContext(sceneName, out var context))
 			{
 				_logger.LogError($"[GameFlow] SceneContext not found: {sceneName}");
@@ -93,26 +95,54 @@ namespace _Main.Scripts.Player.Network
 
 			_modelContext.SetSceneContext(context);
 
+			// Clear previous scene controllers
 			foreach (var ctrl in _sceneControllers)
 			{
 				_lifecycle.Unregister(ctrl);
 			}
 
 			_sceneControllers.Clear();
+			
+			// Register new scene controllers
+			
+			_sceneControllers.AddRange(GetSceneControllersByType(context.SceneType));
 
 			foreach (var area in context.NextAreaNetworkBehaviours)
 			{
 				var controller = new NetworkPlayerNextAreaController(area, _network, _sceneFlow, _modelContext);
-				await _lifecycle.RegisterAsync(controller);
 				_sceneControllers.Add(controller);
 			}
+			
+			foreach (var sceneController in _sceneControllers)
+			{
+				await _lifecycle.RegisterAsync(sceneController);
+			}
 
+			// Spawn players
 			await UniTask.Yield();
 			await _spawn.SpawnAllPlayersForCurrentScene();
 			await UniTask.Yield();
 			await _spawn.RespawnAllPlayers(context.PlayerSpawnPoints);
 
 			_isChangingScene = false;
+		}
+
+
+		private List<IBaseController> GetSceneControllersByType(SceneType type)
+		{
+			var controllers = new List<IBaseController>();
+			
+			
+			switch (type)
+			{
+				case SceneType.Hub:
+					break;
+				case SceneType.Extraction:
+					controllers.AddRange(SceneControllersFactory.GetExtractionSceneControllers(_modelContext, _network));
+					break;
+			}
+			
+			return controllers;
 		}
 	}
 }

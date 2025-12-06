@@ -2,11 +2,11 @@
 
 public class NetworkModel
 {
-	public IReadOnlyDictionary<int, PlayerContext> ownerContexts => _ownerContexts;	
+	public IReadOnlyDictionary<int, PlayerContext.Server> ownerContexts => _ownerContexts;	
 
-	private readonly Dictionary<int, PlayerContext> _ownerContexts = new();
+	private readonly Dictionary<int, PlayerContext.Server> _ownerContexts = new();
 
-	public void AddPlayerContext(int networkPlayerId, PlayerContext playerContext)
+	public void AddPlayerContext(int networkPlayerId, PlayerContext.Server playerContext)
 	{
 		_ownerContexts[networkPlayerId] = playerContext;
 	}

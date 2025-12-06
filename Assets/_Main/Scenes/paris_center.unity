@@ -324,6 +324,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 157813967}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &157813969 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 157813967}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1 &166859065
 GameObject:
   m_ObjectHideFlags: 0
@@ -749,6 +760,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 220479988}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &220479990 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 220479988}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &273936946
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -819,6 +841,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 273936946}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &273936948 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 273936946}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1 &274382784
 GameObject:
   m_ObjectHideFlags: 0
@@ -920,6 +953,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 521172145}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &521172147 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 521172145}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &523182456
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -990,6 +1034,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 523182456}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &523182458 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 523182456}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &526949101
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1060,6 +1115,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 526949101}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &526949103 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 526949101}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &573350544
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1317,6 +1383,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 729481076}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &729481078 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 729481076}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &779514759
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1387,6 +1464,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 779514759}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &779514761 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 779514759}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &812560523
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1457,6 +1545,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 812560523}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &812560525 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 812560523}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &946835501
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1527,6 +1626,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 946835501}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &946835503 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 946835501}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &996203952
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1840,6 +1950,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1177050139}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1177050141 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1177050139}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1 &1268928803
 GameObject:
   m_ObjectHideFlags: 0
@@ -2057,6 +2178,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1319298932}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1319298934 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1319298932}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1 &1327260926
 GameObject:
   m_ObjectHideFlags: 0
@@ -2254,6 +2386,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1376499693}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1376499695 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1376499693}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &1378434059
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2389,6 +2532,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1514110357}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1514110359 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1514110357}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &1588416097
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2459,6 +2613,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1588416097}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1588416099 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1588416097}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &1735478542
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2686,6 +2851,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1873916013}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1873916015 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1873916013}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1001 &1875963086
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2756,6 +2932,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
   m_PrefabInstance: {fileID: 1875963086}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1875963088 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 1875963086}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1 &2094424335
 GameObject:
   m_ObjectHideFlags: 0
@@ -2800,6 +2987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b462ff4b3cdd83342906f9ac5dcf58c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneContext
+  _sceneType: 1
   _playerSpawnPoints:
   - {fileID: 1868913068}
   - {fileID: 996203953}
@@ -2808,7 +2996,25 @@ MonoBehaviour:
   _nextAreaNetworkBehaviours:
   - {fileID: 659646661}
   - {fileID: 1735478543}
-  _crumbsNetworkBehaviours: []
+  _crumbsNetworkBehaviours:
+  - {fileID: 6599179025812214741}
+  - {fileID: 157813969}
+  - {fileID: 220479990}
+  - {fileID: 273936948}
+  - {fileID: 526949103}
+  - {fileID: 1177050141}
+  - {fileID: 779514761}
+  - {fileID: 1376499695}
+  - {fileID: 1319298934}
+  - {fileID: 1875963088}
+  - {fileID: 729481078}
+  - {fileID: 521172147}
+  - {fileID: 1514110359}
+  - {fileID: 946835503}
+  - {fileID: 1588416099}
+  - {fileID: 812560525}
+  - {fileID: 1873916015}
+  - {fileID: 523182458}
   _nextSceneName: hub
 --- !u!1001 &6599179025812214740
 PrefabInstance:
@@ -2818,6 +3024,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1297581144}
     m_Modifications:
+    - target: {fileID: 35557163271271378, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 715640657758499571, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
       propertyPath: WasActiveDuringEdit
       value: 1
@@ -2829,6 +3039,10 @@ PrefabInstance:
     - target: {fileID: 6444428787392707510, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
       propertyPath: m_Name
       value: Crumb
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745619891480025438, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 8128313904359137232, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2875,6 +3089,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+--- !u!114 &6599179025812214741 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2534230347626242553, guid: 0c725b4366624db4e8c053b44a1d0d43, type: 3}
+  m_PrefabInstance: {fileID: 6599179025812214740}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1558e1996c5f404dbe423de9e333894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Interactables.Crumb.CrumbPlayerTrigger
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

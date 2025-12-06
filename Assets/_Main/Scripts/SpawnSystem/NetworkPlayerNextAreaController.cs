@@ -73,7 +73,7 @@ namespace _Main.Scripts.Player.Network
 			}
 		}
 
-		private void OnPlayerEnteredHandler(int playerId)
+		private void OnPlayerEnteredHandler(int objectId, int playerId)
 		{
 			if (!_networkService.IsServer)
 			{
@@ -89,7 +89,7 @@ namespace _Main.Scripts.Player.Network
 			}
 		}
 
-		private void OnPlayerExitedHandler(int playerId)
+		private void OnPlayerExitedHandler(int objectId, int playerId)
 		{
 			if (!_networkService.IsServer)
 			{

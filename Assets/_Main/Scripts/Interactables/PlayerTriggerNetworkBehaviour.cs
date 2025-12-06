@@ -6,8 +6,8 @@ namespace _Main.Scripts.Location
 {
 	public class PlayerTriggerNetworkBehaviour : NetworkBehaviour
 	{
-		public event Action<int> OnPlayerEntered;
-		public event Action<int> OnPlayerExited;
+		public event Action<int, int> OnPlayerEntered;
+		public event Action<int, int> OnPlayerExited;
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!NetworkManager.ServerManager.Started)
@@ -26,11 +26,9 @@ namespace _Main.Scripts.Location
 			{
 				return;
 			}
-
-			OnPlayerEntered?.Invoke(bridge.OwnerId);
 			
 			OnPlayerEnterInTrigger(player);
-			OnPlayerEntered?.Invoke(player.OwnerId);
+			OnPlayerEntered?.Invoke(ObjectId, player.OwnerId);
 		}
 
 		private void OnTriggerExit(Collider other)
@@ -47,7 +45,7 @@ namespace _Main.Scripts.Location
 			}
 
 			OnPlayerExitTrigger(player);
-			OnPlayerExited?.Invoke(player.OwnerId);
+			OnPlayerExited?.Invoke(ObjectId, player.OwnerId);
 		}
 
 		protected virtual void OnPlayerEnterInTrigger(NetworkObject playerNetworkObject)
