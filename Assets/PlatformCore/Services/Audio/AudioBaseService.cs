@@ -50,6 +50,7 @@ namespace PlatformCore.Services.Audio
 
 		public async UniTask StopMusicAsync(float fadeTime = 1f)
 		{
+			await UniTask.Yield();
 			if (!_currentMusic.isValid()) return;
 
 			_logger?.Log("[AudioService] Stopping music");

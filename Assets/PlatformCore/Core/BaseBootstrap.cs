@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace PlatformCore.Core
 {
-	[RequireComponent(typeof(GameContext))]
+	[RequireComponent(typeof(PersistentSceneContext))]
 	public abstract class BaseBootstrap : MonoBehaviour
 	{
 #if UNITY_EDITOR
 		public BaseGameRoot GameRoot => _gameRoot;
 #endif
-		private GameContext _gameContext;
+		private PersistentSceneContext _persistentSceneContext;
 		private BaseGameRoot _gameRoot;
 		private bool _initialized;
 
@@ -20,11 +20,11 @@ namespace PlatformCore.Core
 				return;
 			}
 
-			_gameContext = GetComponent<GameContext>();
+			_persistentSceneContext = GetComponent<PersistentSceneContext>();
 			DontDestroyOnLoad(gameObject);
 
 			_gameRoot = CreateGameRoot();
-			_gameRoot.LaunchAsync(_gameContext).Forget();
+			_gameRoot.LaunchAsync(_persistentSceneContext).Forget();
 
 			_initialized = true;
 		}

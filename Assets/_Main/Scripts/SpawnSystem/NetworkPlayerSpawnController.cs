@@ -37,7 +37,6 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	{
 		_connection.OnRemoteClientConnected += OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected += OnRemoteClientDisconnected;
-
 		_connection.OnRemoteClientLoadedStartScenes += OnRemoteClientLoadedStartScenes;
 	}
 
@@ -45,7 +44,6 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 	{
 		_connection.OnRemoteClientConnected -= OnRemoteClientConnected;
 		_connection.OnRemoteClientDisconnected -= OnRemoteClientDisconnected;
-
 		_connection.OnRemoteClientLoadedStartScenes -= OnRemoteClientLoadedStartScenes;
 	}
 
@@ -147,13 +145,8 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			ResourcePaths.Characters.Player,
 			spawnPoint.position,
 			spawnPoint.rotation,
-			connection);
-
-		var persistent = SceneManager.GetSceneByName(SceneNames.PersistentScene);
-		if (persistent.IsValid())
-		{
-			SceneManager.MoveGameObjectToScene(nob.gameObject, persistent);
-		}
+			connection,
+			_gameModelContext.PersistentSceneContext.scene);
 
 		var view = nob.GetComponent<PlayerView>();
 		var bridge = nob.GetComponent<PlayerNetworkBridge>();
@@ -165,6 +158,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 		}
 
 		_networkModel.AddPlayerContext(clientId, serverCtx);
+		serverCtx.Model.SetPlayerName($"Player {clientId}");
 	}
 
 	public async UniTask RespawnAllPlayers(Transform[] spawnPoints)

@@ -2,6 +2,7 @@
 using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services.Factory
 {
@@ -12,7 +13,7 @@ namespace PlatformCore.Services.Factory
 			Vector3 position,
 			Quaternion rotation,
 			NetworkConnection owner = null,
-			Transform parent = null);
+			Scene scene = default);
 
 		void DestroyNetwork(NetworkObject nob);
 	}

@@ -484,10 +484,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 934570884, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
-      propertyPath: '_defaultConditions.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 2033f54fd2794464bae08fa5a55c8996, type: 2}
     - target: {fileID: 7443408887813606049, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.48338
@@ -528,10 +524,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7443408887813606050, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
-      propertyPath: _logging
-      value: 
-      objectReference: {fileID: 11400000, guid: bf02060e6f596954b827abbd4736d226, type: 2}
     - target: {fileID: 7443408887813606051, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: m_Name
       value: NetworkManager
@@ -839,7 +831,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a8b6183ca646aba3c7f7062370ce03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PlatformCore::PlatformCore.Core.GameContext
-  _playersParentTransform: {fileID: 1160060454}
   StaticCanvas: {fileID: 223825904}
   DynamicCanvas: {fileID: 701970369}
 --- !u!1 &1160060453
@@ -1019,5 +1010,5 @@ SceneRoots:
   - {fileID: 1083306351}
   - {fileID: 832575519}
   - {fileID: 269698225}
-  - {fileID: 415931615}
   - {fileID: 1160060454}
+  - {fileID: 415931615}

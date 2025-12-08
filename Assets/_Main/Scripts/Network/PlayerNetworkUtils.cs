@@ -1,4 +1,6 @@
-﻿using FishNet;
+﻿using _Main.Scripts.Core;
+using FishNet;
+using UnityEngine;
 
 public static class PlayerNetworkUtils
 {
@@ -19,5 +21,14 @@ public static class PlayerNetworkUtils
 		}
 
 		return null;
+	}
+	
+	public static void MoveToPersistent(GameObject gameObjectToMove)
+	{
+		var persistent = UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneNames.PersistentScene);
+		if (persistent.IsValid())
+		{
+			UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObjectToMove, persistent);
+		}
 	}
 }

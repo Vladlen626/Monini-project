@@ -4,6 +4,7 @@ using FishNet;
 using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services.Factory
 {
@@ -83,7 +84,7 @@ namespace PlatformCore.Services.Factory
 
 		public async UniTask<NetworkObject> CreateNetworkAsync(
 			string address, Vector3 position, Quaternion rotation, NetworkConnection owner = null,
-			Transform parent = null)
+			Scene scene = default)
 		{
 			var prefab = await _resourceService.LoadAsync<GameObject>(address);
 			if (prefab == null)
@@ -105,8 +106,8 @@ namespace PlatformCore.Services.Factory
 				return null;
 			}
 
-			var instance = Object.Instantiate(nob, position, rotation, parent);
-			_networkService.Spawn(instance, owner);
+			var instance = Object.Instantiate(nob, position, rotation);
+			_networkService.Spawn(instance, owner, scene);
 			return instance;
 		}
 

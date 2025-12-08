@@ -1,28 +1,22 @@
 using System;
-using System.Threading;
-using _Main.Scripts.Core;
 using _Main.Scripts.Player;
 using FishNet.Component.Transforming;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
-using PlatformCore.Core;
-using PlatformCore.Infrastructure.Lifecycle;
-using PlatformCore.Services.Factory;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerView), typeof(NetworkTransform))]
 public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 {
 	public event Action OnSlamReceived;
-	public event Action<int> OnClientInitialized;
 
 	[SerializeField] 
 	private GameObject _slamFx;
 	[SerializeField] 
 	private SlamTrigger _slamTrigger;
 
-	
+	public readonly SyncVar<string> PlayerName = new();
 	public readonly SyncVar<PlayerState> State = new();
 	public readonly SyncVar<int> CrumbsCount = new();
 
@@ -34,7 +28,6 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 		_view = GetComponent<PlayerView>();
 		_networkTransform = GetComponent<NetworkTransform>();
 	}
-
 	public override void OnStartServer()
 	{
 		_slamTrigger.SetupBridge(this);
@@ -45,19 +38,11 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	{
 		_slamTrigger.OnSlamImpactReceived -= OnSlamImpactHandler;
 	}
-
-	public override async void OnStartClient()
+	
+	public override void OnStartClient()
 	{
 		base.OnStartClient(); 
-		MoveToPersistent(gameObject);
-	}
-	private void MoveToPersistent(GameObject gameObjectToMove)
-	{
-		var persistent = UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneNames.PersistentScene);
-		if (persistent.IsValid())
-		{
-			UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObjectToMove, persistent);
-		}
+		PlayerNetworkUtils.MoveToPersistent(gameObject);
 	}
 
 	private void OnSlamImpactHandler(int targetId)
@@ -66,7 +51,6 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 		{
 			return;
 		}
-
 
 		var slamReceiver = networkObject.GetComponent<ISlamImpactReceiver>();
 		if (slamReceiver != null)

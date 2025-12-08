@@ -82,6 +82,7 @@ namespace PlatformCore.Services
 			return _camera != null ? _camera.Lens.Dutch : 0f;
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public async UniTask ShakeAsync(float intensity, float duration)
 		{
 			if (!_noise || IsShaking)

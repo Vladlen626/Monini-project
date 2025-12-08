@@ -103,6 +103,7 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 715640657758499571}
   _networkObjectCache: {fileID: 0}
+  _crumbsValue: 1
 --- !u!114 &715640657758499571
 MonoBehaviour:
   m_ObjectHideFlags: 0

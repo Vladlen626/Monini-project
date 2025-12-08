@@ -64,7 +64,7 @@ namespace PlatformCore.Services
 			_loggerService?.Log($"[ResourceService] Memory cleanup complete.");
 		}
 
-		public void Dispose()
+		public override void Dispose()
 		{
 			_loggerService?.Log("[ResourceService] Disposed");
 

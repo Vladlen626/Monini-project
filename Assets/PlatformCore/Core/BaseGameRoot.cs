@@ -26,7 +26,7 @@ namespace PlatformCore.Core
 			_lifetimeService = new ApplicationLifetimeService();
 		}
 
-		public async UniTask LaunchAsync(GameContext context)
+		public async UniTask LaunchAsync(PersistentSceneContext context)
 		{
 			try
 			{
@@ -50,9 +50,9 @@ namespace PlatformCore.Core
 			await _serviceLocator.InitializeAllAsync(ApplicationCancellationToken);
 		}
 
-		protected abstract void RegisterServices(GameContext gameContext);
+		protected abstract void RegisterServices(PersistentSceneContext persistentSceneContext);
 
-		protected abstract UniTask LaunchGameAsync(GameContext gameContext);
+		protected abstract UniTask LaunchGameAsync(PersistentSceneContext persistentSceneContext);
 
 
 		public void OnUpdate(float delta)

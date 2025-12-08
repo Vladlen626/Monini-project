@@ -22,12 +22,20 @@ namespace _Main.Scripts.Player.Controllers
 		{
 			_bridge.State.OnChange += OnStateChangedHandler;
 			_model.OnCrumbValueChanged += OnCrumbValueChanged;
+			_model.OnPlayerNameChanged += ModelOnPlayerNameChangedHandler;
 		}
 
 		public void Deactivate()
 		{
 			_bridge.State.OnChange -= OnStateChangedHandler;
 			_model.OnCrumbValueChanged -= OnCrumbValueChanged;
+			_model.OnPlayerNameChanged -= ModelOnPlayerNameChangedHandler;
+		}
+
+		private void ModelOnPlayerNameChangedHandler(string newName)
+		{
+			_bridge.PlayerName.Value = newName;
+			_bridge.PlayerName.DirtyAll();
 		}
 
 		private void OnStateChangedHandler(PlayerState state, PlayerState next, bool asServer)
@@ -39,6 +47,7 @@ namespace _Main.Scripts.Player.Controllers
 		private void OnCrumbValueChanged(int crumbsValue)
 		{
 			_bridge.CrumbsCount.Value = crumbsValue;
+			_bridge.CrumbsCount.DirtyAll();
 		}
 	}
 }

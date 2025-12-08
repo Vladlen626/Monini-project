@@ -20,6 +20,7 @@ namespace _Main.Scripts.Core
 		public bool IsHost => IsServer && IsClient;
 
 		public bool IsServerStarted => _networkManager.IsServerStarted;
+		public bool IsClientStarted => _networkManager.IsClientStarted;
 		public int LocalClientId => _networkManager.ClientManager.Connection.ClientId;
 		public int PlayersCount =>  _networkManager.ServerManager.Clients.Count;
 
@@ -62,9 +63,9 @@ namespace _Main.Scripts.Core
 			}
 		}
 
-		public void Spawn(NetworkObject nob, NetworkConnection conn)
+		public void Spawn(NetworkObject nob, NetworkConnection conn, UnityEngine.SceneManagement.Scene scene = default)
 		{
-			_networkManager.ServerManager.Spawn(nob, conn);
+			_networkManager.ServerManager.Spawn(nob, conn, scene);
 		}
 		
 		public void Despawn(NetworkObject nob)

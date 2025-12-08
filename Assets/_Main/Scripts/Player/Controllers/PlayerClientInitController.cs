@@ -1,8 +1,10 @@
 ﻿using System.Threading;
+using _Main.Scripts.Core;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
+using UnityEngine;
 
 namespace _Main.Scripts.Player.Controllers
 {
@@ -27,7 +29,7 @@ namespace _Main.Scripts.Player.Controllers
 		public void Activate()
 		{
 			_cts = new CancellationTokenSource();
-
+			DebugNet.TryAll("Activate client init controller");
 			_connectionEvents.OnLocalClientLoadedStartScenes += OnLocalClientLoadedStartScenes;
 		}
 
@@ -48,7 +50,7 @@ namespace _Main.Scripts.Player.Controllers
 		private async UniTaskVoid InitializeLocalPlayerAsync(CancellationToken ct)
 		{
 			PlayerNetworkBridge bridge = null;
-			
+
 			await UniTask.WaitUntil(() =>
 			{
 				bridge = PlayerNetworkUtils.FindLocalPlayerBridge();
@@ -63,6 +65,8 @@ namespace _Main.Scripts.Player.Controllers
 			var view = bridge.GetComponent<PlayerView>();
 
 			var ctx = await PlayerContext.Client.CreateAsync(bridge, view, _objectFactory, ct);
+			
+			PlayerNetworkUtils.MoveToPersistent(ctx.Camera.GetCameraTransform().gameObject);
 
 			ctx.Camera.AttachTo(view.CameraRoot);
 

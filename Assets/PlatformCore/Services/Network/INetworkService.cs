@@ -12,12 +12,13 @@ namespace _Main.Scripts.Core
 		bool IsClient { get; }
 		bool IsHost { get; }
 		bool IsServerStarted { get; }
+		bool IsClientStarted { get; }
 		int LocalClientId { get; }
 		int PlayersCount { get; }
 		void StartHost();
 		void StartClient();
 		void Stop();
-		void Spawn(NetworkObject nob, NetworkConnection conn);
+		public void Spawn(NetworkObject nob, NetworkConnection conn, UnityEngine.SceneManagement.Scene scene = default);
 		void Despawn(NetworkObject nob);
 		NetworkConnection GetClientConnection(int clientId);
 		bool TryGetSpawnedNetworkObject(int objectId, out NetworkObject networkObject);

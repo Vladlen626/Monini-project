@@ -15,7 +15,7 @@ namespace _Main.Scripts.Core
 {
 	public class GameRoot : BaseGameRoot
 	{
-		protected override void RegisterServices(GameContext context)
+		protected override void RegisterServices(PersistentSceneContext context)
 		{
 			Debug.Log("[GameRoot] Register services...");
 
@@ -52,18 +52,16 @@ namespace _Main.Scripts.Core
 			Debug.Log("[GameRoot] Services finally registered.!");
 		}
 
-		protected override async UniTask LaunchGameAsync(GameContext context)
+		protected override async UniTask LaunchGameAsync(PersistentSceneContext context)
 		{
 			var cursor = _serviceLocator.Get<ICursorService>();
 			var network = _serviceLocator.Get<INetworkService>();
 			var objectFactory = _serviceLocator.Get<IObjectFactory>();
 			var sceneFlowService = _serviceLocator.Get<ISceneFlowService>();
-			var gameModelContext = new GameModelContext();
+			var gameModelContext = new GameModelContext(context);
 
 			StartNetwork(network);
-
-			await UniTask.WaitUntil(() => network.IsServerStarted);
-
+			await UniTask.WaitUntil(() => network.IsServerStarted || network.IsClientStarted);
 			cursor.UnlockCursor();
 			var networkConnectionController = new NetworkConnectionController();
 			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,

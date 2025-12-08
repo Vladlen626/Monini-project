@@ -18,13 +18,13 @@ namespace _Main.Scripts.Player
 		{
 			base.OnActivate();
 			_playerBridge.CrumbsCount.OnChange += CrumbsCountOnOnChange;
-			
+			_context.SetCrumbsNumber(_playerBridge.CrumbsCount.Value);
 		}
 
 		protected override void OnDeactivate()
 		{
-			base.OnDeactivate();
 			_playerBridge.CrumbsCount.OnChange -= CrumbsCountOnOnChange;
+			base.OnDeactivate();
 		}
 
 		private void CrumbsCountOnOnChange(int prev, int next, bool asServer)

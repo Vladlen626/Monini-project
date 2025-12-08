@@ -15,11 +15,21 @@ namespace _Main.Scripts.Player
 		protected override void OnActivate()
 		{
 			base.OnActivate();
+			_playerBridge.PlayerName.OnChange += PlayerNameOnChangeHandler;
+			_context.SetPlayerName(_playerBridge.PlayerName.Value);
 		}
 
 		protected override void OnDeactivate()
 		{
-			base.OnDeactivate();
+			_playerBridge.PlayerName.OnChange += PlayerNameOnChangeHandler;
 		}
+
+
+		private void PlayerNameOnChangeHandler(string prev, string next, bool asServer)
+		{
+			_context.SetPlayerName(next);
+		}
+
+		
 	}
 }

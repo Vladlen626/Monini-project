@@ -20,14 +20,14 @@ namespace PlatformCore.Services.UI.SplashScreen
 			return _uiService.PreloadAsync<SplashScreenElement>();
 		}
 
-		public async UniTask FadeInAsync(float duration = 1f)
+		public UniTask FadeInAsync(float duration = 1f)
 		{
-
+			return UniTask.CompletedTask;
 		}
 
-		public async UniTask FadeOutAsync(float duration = 1f)
+		public UniTask FadeOutAsync(float duration = 1f)
 		{
-			
+			return UniTask.CompletedTask;
 		}
 
 		public async UniTask ShowSplashAsync(float duration = 2f, float fadeIn = 0.5f, float fadeOut = 0.5f)

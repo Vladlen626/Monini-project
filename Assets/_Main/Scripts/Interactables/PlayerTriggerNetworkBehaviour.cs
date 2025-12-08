@@ -10,25 +10,25 @@ namespace _Main.Scripts.Location
 		public event Action<int, int> OnPlayerExited;
 		private void OnTriggerEnter(Collider other)
 		{
-			if (!NetworkManager.ServerManager.Started)
+			var bridge = other.GetComponent<PlayerNetworkBridge>();
+			if (bridge == null)
 			{
 				return;
 			}
-			
+
 			var player = other.GetComponent<NetworkObject>();
 			if (player == null)
 			{
 				return;
 			}
 
-			var bridge = other.GetComponent<PlayerNetworkBridge>();
-			if (bridge == null)
+			if (!NetworkManager.ServerManager.Started)
 			{
+				OnPlayerEnterInTriggerClient(player);
 				return;
 			}
 			
-			OnPlayerEnterInTrigger(player);
-			OnPlayerEntered?.Invoke(ObjectId, player.OwnerId);
+			OnPlayerEnterInTriggerServer(player);
 		}
 
 		private void OnTriggerExit(Collider other)
@@ -48,7 +48,12 @@ namespace _Main.Scripts.Location
 			OnPlayerExited?.Invoke(ObjectId, player.OwnerId);
 		}
 
-		protected virtual void OnPlayerEnterInTrigger(NetworkObject playerNetworkObject)
+		protected virtual void OnPlayerEnterInTriggerServer(NetworkObject playerNetworkObject)
+		{
+			OnPlayerEntered?.Invoke(ObjectId, playerNetworkObject.OwnerId);
+		}
+		
+		protected virtual void OnPlayerEnterInTriggerClient(NetworkObject playerNetworkObject)
 		{
 		}
 		

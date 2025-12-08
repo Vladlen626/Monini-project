@@ -64,11 +64,19 @@ namespace _Main.Scripts.Player.Network
 			{
 				return;
 			}
+			
+			// Clear previous scene controllers
+			foreach (var ctrl in _sceneControllers)
+			{
+				_lifecycle.Unregister(ctrl);
+			}
+
+			_sceneControllers.Clear();
 
 			_isChangingScene = true;
 			_logger.Log($"[GameFlow] Load environment: {sceneName}");
 
-			// Setup scene
+			// Setup scene and unload previous
 			if (!string.IsNullOrEmpty(_currentEnvironmentScene))
 			{
 				var persistent = SceneManager.GetSceneByName(SceneNames.PersistentScene);
@@ -94,14 +102,6 @@ namespace _Main.Scripts.Player.Network
 			}
 
 			_modelContext.SetSceneContext(context);
-
-			// Clear previous scene controllers
-			foreach (var ctrl in _sceneControllers)
-			{
-				_lifecycle.Unregister(ctrl);
-			}
-
-			_sceneControllers.Clear();
 			
 			// Register new scene controllers
 			

@@ -7,17 +7,20 @@ namespace _Main.Scripts.Player
 	{
 		public event Action<PlayerState> OnPlayerStateChanged;
 		public event Action<int> OnCrumbValueChanged;
-		public PlayerState State { get; private set; } = PlayerState.Normal;
+		public event Action<string> OnPlayerNameChanged;
+		
+		public string playerName { get; private set; } = "Unknown";
+		public PlayerState state { get; private set; } = PlayerState.Normal;
 		public int crumbsCount { get; private set; }
 
 		public void SetState(PlayerState newState)
 		{
-			if (State == newState)
+			if (state == newState)
 			{
 				return;
 			}
 
-			State = newState;
+			state = newState;
 			OnPlayerStateChanged?.Invoke(newState);
 		}
 		public void CollectCrumbs(int crumbsNum)
@@ -31,5 +34,15 @@ namespace _Main.Scripts.Player
 			crumbsCount -= crumbsNum;
 			OnCrumbValueChanged?.Invoke(crumbsCount);
 		}
+		
+		public void SetPlayerName(string inPlayerName)
+		{
+			playerName = inPlayerName;
+			OnPlayerNameChanged?.Invoke(playerName);
+		}
 	}
+	
+	// Ввод от игрока
+
+	// Состояние для исправления ошибок (Reconcile)
 }

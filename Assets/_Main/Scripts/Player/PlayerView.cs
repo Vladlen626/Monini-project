@@ -43,16 +43,16 @@ public class PlayerView : MonoBehaviour
 		_wasGrounded = IsGrounded;
 	}
 
-	public void ApplyMovement(Vector3 velocity)
+	public void ApplyMovement(Vector3 velocity, float dt)
 	{
-		_characterController.Move(velocity * Time.deltaTime);
+		_characterController.Move(velocity * dt);
 
 		var horizontal = new Vector3(velocity.x, 0, velocity.z);
 		if (horizontal.sqrMagnitude > 0.0001f)
 		{
 			var target = Quaternion.LookRotation(horizontal, Vector3.up);
 			_playerVisualTransform.rotation =
-				Quaternion.RotateTowards(_playerVisualTransform.rotation, target, _rotateSpeedDeg * Time.deltaTime);
+				Quaternion.RotateTowards(_playerVisualTransform.rotation, target, _rotateSpeedDeg * dt);
 		}
 	}
 

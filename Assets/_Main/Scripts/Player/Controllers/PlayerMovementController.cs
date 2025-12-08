@@ -8,134 +8,77 @@ using UnityEngine;
 
 namespace _Main.Scripts.Player
 {
-	public class PlayerMovementController : IBaseController, IUpdatable
+	public class PlayerMovementController : IBaseController
 	{
-		private readonly IInputService _inputService;
-		private readonly IAudioService _audioService;
 		private readonly PlayerConfig _playerConfig;
 		private readonly PlayerView _playerView;
-		private readonly Transform _cameraTransform;
+		private readonly PlayerNetworkBridge _bridge;
 
 		private bool _isGrounded;
-		private Vector3 _verticalVelocity;
 		private Vector3 _velocity;
-		private bool _prevJumpHeld;
+		private float _verticalY;
 		private float _coyoteTimer;
 		private float _jumpBufferTimer;
+		private float _suppressJumpTimer;
+		
+		private bool _prevJumpHeld;
 		private Vector3 _velXZ;
-		private float _verticalY;
-		private bool _wasGrounded;
 		private Vector3 _groundNormal = Vector3.up;
-		private Vector3 _cameraForward;
-		private Vector3 _cameraRight;
 		private Vector3 _desiredDirection;
 		private Vector3 _targetVelXZ;
-		private readonly RaycastHit[] _groundHits = new RaycastHit[1];
-
 		private bool _hasPendingVerticalOverride;
 		private float _pendingVerticalY;
 		private Vector3 _pendingImpulseXZ;
-		private float _suppressJumpTimer;
+	
+		
 
-		//network
-		private PlayerNetworkBridge _bridge;
-
-		public PlayerMovementController(IInputService inputService, PlayerConfig playerConfig, PlayerView playerView,
-			Transform cameraTransform, PlayerNetworkBridge bridge)
+		public PlayerMovementController(PlayerConfig playerConfig, PlayerView playerView, PlayerNetworkBridge bridge)
 		{
-			_cameraTransform = cameraTransform;
-			_inputService = inputService;
 			_playerConfig = playerConfig;
 			_playerView = playerView;
 			_bridge = bridge;
 		}
 
-		public void OnUpdate(float deltaTime)
+		public void Simulate(float dt, PlayerInputData input)
 		{
-			if (!_bridge.IsOwner)
-			{
-				return;
-			}
-
-			if (_bridge.State.Value is PlayerState.Flat)
-			{
-				return;
-			}
-
-			HandleMovement(deltaTime);
-		}
-
-		public void RequestVerticalOverride(float y)
-		{
-			_hasPendingVerticalOverride = true;
-			_pendingVerticalY = y; // заменить вертикальную скорость в ЭТОМ кадре
-		}
-
-		public void AddImpulseXZ(Vector3 impulse)
-		{
-			_pendingImpulseXZ.x += impulse.x;
-			_pendingImpulseXZ.z += impulse.z;
-		}
-
-		public void SuppressJumpFor(float duration)
-		{
-			if (duration > _suppressJumpTimer) _suppressJumpTimer = duration;
-		}
-
-		private void HandleMovement(float dt)
-		{
-			// === Grounded / Coyote ===
+			var camRot = Quaternion.Euler(0, input.CameraYaw, 0);
+			var cameraForward = camRot * Vector3.forward;
+			var cameraRight = camRot * Vector3.right;
 			_isGrounded = _playerView.IsGrounded;
 			_coyoteTimer = _isGrounded ? _playerConfig.coyoteTime : Mathf.Max(0f, _coyoteTimer - dt);
 
-			//Server safe
-			if (_cameraTransform)
-			{
-				_cameraForward = _cameraTransform.forward;
-				_cameraRight = _cameraTransform.right;
-			}
-			else
-			{
-				_cameraForward = Vector3.forward;
-				_cameraRight = Vector3.right;
-			}
-
 			// === Jump buffer ===
-			bool jumpHeld = _inputService.IsJumping;
+			bool jumpHeld = input.Jump;
 			bool jumpPressedThisFrame = jumpHeld && !_prevJumpHeld;
 			_prevJumpHeld = jumpHeld;
 			if (jumpPressedThisFrame) _jumpBufferTimer = _playerConfig.jumpBuffer;
 			else _jumpBufferTimer = Mathf.Max(0f, _jumpBufferTimer - dt);
 
 			// === Ввод и базовое желаемое направление (камеро-ориентированное) ===
-			Vector2 in2 = _inputService.Move;
-			if (_bridge.State.Value == PlayerState.Slam)
-			{
-				in2 = Vector2.zero;;
-			}
+			Vector2 in2 = input.Move;
 
-			_cameraForward.y = 0f;
-			float forwardMag = _cameraForward.sqrMagnitude;
+			cameraForward.y = 0f;
+			float forwardMag = cameraForward.sqrMagnitude;
 			if (forwardMag > Mathf.Epsilon)
 			{
 				float invMag = 1f / Mathf.Sqrt(forwardMag);
-				_cameraForward.x *= invMag;
-				_cameraForward.z *= invMag;
+				cameraForward.x *= invMag;
+				cameraForward.z *= invMag;
 			}
 
 
-			_cameraRight.y = 0f;
-			float rightMag = _cameraRight.sqrMagnitude;
+			cameraRight.y = 0f;
+			float rightMag = cameraRight.sqrMagnitude;
 			if (rightMag > Mathf.Epsilon)
 			{
 				float invMag = 1f / Mathf.Sqrt(rightMag);
-				_cameraRight.x *= invMag;
-				_cameraRight.z *= invMag;
+				cameraRight.x *= invMag;
+				cameraRight.z *= invMag;
 			}
 
-			_desiredDirection.x = _cameraRight.x * in2.x + _cameraForward.x * in2.y;
+			_desiredDirection.x = cameraRight.x * in2.x + cameraForward.x * in2.y;
 			_desiredDirection.y = 0f;
-			_desiredDirection.z = _cameraRight.z * in2.x + _cameraForward.z * in2.y;
+			_desiredDirection.z = cameraRight.z * in2.x + cameraForward.z * in2.y;
 
 			float desiredSqr = _desiredDirection.sqrMagnitude;
 			if (desiredSqr > 1f)
@@ -153,7 +96,7 @@ namespace _Main.Scripts.Player
 			}
 
 			// === Целевая скорость ===
-			float maxSpeed = _inputService.IsSprinting ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
+			float maxSpeed = input.Sprint ? _playerConfig.sprintSpeed : _playerConfig.walkSpeed;
 			_targetVelXZ.x = _desiredDirection.x * maxSpeed;
 			_targetVelXZ.y = 0f;
 			_targetVelXZ.z = _desiredDirection.z * maxSpeed;
@@ -242,7 +185,43 @@ namespace _Main.Scripts.Player
 			float speed01 = Mathf.Clamp01(_velXZ.magnitude / Mathf.Max(0.01f, maxSpeed));
 			float rotSpeed = Mathf.Lerp(_playerConfig.minRotateSpeed, _playerConfig.maxRotateSpeed, speed01);
 			_playerView.SetRotateSpeed(rotSpeed);
-			_playerView.ApplyMovement(_velocity);
+			_playerView.ApplyMovement(_velocity, dt);
+		}
+
+		public void WriteState(ref PlayerStateData data)
+		{
+			data.Position = _playerView.Position;
+			data.Rotation = _playerView.transform.rotation;
+			data.Velocity = _velocity;
+			data.VerticalY = _verticalY;
+			data.IsGrounded = _isGrounded;
+			data.CoyoteTimer = _coyoteTimer;
+		}
+
+		public void ReadState(PlayerStateData data)
+		{
+			_playerView.TeleportTo(data.Position, data.Rotation);
+
+			_velocity = data.Velocity;
+			_verticalY = data.VerticalY;
+			_isGrounded = data.IsGrounded;
+			_coyoteTimer = data.CoyoteTimer;
+		}
+		public void RequestVerticalOverride(float y)
+		{
+			_hasPendingVerticalOverride = true;
+			_pendingVerticalY = y; // заменить вертикальную скорость в ЭТОМ кадре
+		}
+
+		public void AddImpulseXZ(Vector3 impulse)
+		{
+			_pendingImpulseXZ.x += impulse.x;
+			_pendingImpulseXZ.z += impulse.z;
+		}
+
+		public void SuppressJumpFor(float duration)
+		{
+			if (duration > _suppressJumpTimer) _suppressJumpTimer = duration;
 		}
 
 		private static void ProjectOnPlaneNormalized(ref Vector3 vector, Vector3 planeNormal)
