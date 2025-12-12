@@ -1,9 +1,10 @@
 ﻿using PlatformCore.Core;
+using PlatformCore.Infrastructure.Lifecycle;
 using UnityEngine;
 
 namespace _Main.Scripts.Player.Controllers
 {
-	public class ClientPlayerStateController : IBaseController
+	public class ClientPlayerStateController : IBaseController, IActivatable
 	{
 		private readonly PlayerStateMachine _machine;
 		private readonly PlayerNetworkBridge _bridge;
@@ -14,10 +15,21 @@ namespace _Main.Scripts.Player.Controllers
 			_machine = new PlayerStateMachine(view, view.GetComponent<CharacterController>());
 		}
 
-		public void ChangeState(PlayerState state)
+		public void Activate()
 		{
-			_machine.ChangeState(state);
-			_bridge.Server_ChangeState(state);
+			_bridge.State.OnChange += OnChangeStateHandler;
+			_machine.ChangeState(_bridge.State.Value);
+		}
+
+		public void Deactivate()
+		{
+			_bridge.State.OnChange -= OnChangeStateHandler;
+		}
+
+		private void OnChangeStateHandler(PlayerState prev, PlayerState next, bool asServer)
+		{
+			DebugNet.TryAll($"[State changed] On Client {next}]");
+			_machine.ChangeState(next);
 		}
 	}
 }

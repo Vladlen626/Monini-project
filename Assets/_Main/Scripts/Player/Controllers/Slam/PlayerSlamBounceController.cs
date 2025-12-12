@@ -1,7 +1,5 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
-using _Main.Scripts.Core.Services;
-using _Main.Scripts.Player.Controllers;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services;
@@ -11,10 +9,14 @@ namespace _Main.Scripts.Player
 {
 	public class PlayerSlamBounceController : IBaseController, IActivatable
 	{
+		public event Action OnStartDiving;
+		public event Action OnStopDiving;
+		public bool WasDivingLastFrame { get; private set; }
 		private readonly PlayerMovementController _movement;
 		private readonly PlayerView _view;
 		private readonly ICameraShakeService _shake;
 		private readonly PlayerConfig _config;
+		private readonly PlayerNetworkBridge _bridge;
 
 		// Состояние
 		private bool _diving;
@@ -25,6 +27,11 @@ namespace _Main.Scripts.Player
 
 		private float _impactDelayTimer;
 		private bool _isImpactDelayed;
+		private float _landingCameraYaw; 
+		
+		private bool _wasDivingLastTick;
+		private uint _lastDiveStartTick;
+		private uint _lastDiveStopTick;
 
 		private class BounceConfig
 		{
@@ -43,6 +50,7 @@ namespace _Main.Scripts.Player
 		public PlayerSlamBounceController(
 			PlayerMovementController movement,
 			PlayerView view,
+			PlayerNetworkBridge bridge,
 			ICameraShakeService shake,
 			PlayerConfig config)
 		{
@@ -50,6 +58,7 @@ namespace _Main.Scripts.Player
 			_view = view;
 			_shake = shake;
 			_config = config;
+			_bridge = bridge;
 		}
 
 		public void Activate()
@@ -65,6 +74,7 @@ namespace _Main.Scripts.Player
 
 		public void Simulate(float dt, PlayerInputData input)
 		{
+			WasDivingLastFrame = _diving;
 			if (_cooldown > 0f)
 			{
 				_cooldown -= dt;
@@ -87,15 +97,45 @@ namespace _Main.Scripts.Player
 				StartDive();
 			}
 
+			if (_diving && _awaitLand)
+			{
+				_landingCameraYaw = input.CameraYaw;
+			}
+
 			if (_isImpactDelayed)
 			{
 				_impactDelayTimer -= dt;
 				if (_impactDelayTimer <= 0f)
 				{
-					ApplyBounceForce(input.CameraYaw);
+					ApplyBounceForce(_landingCameraYaw);
 					_isImpactDelayed = false;
 				}
 			}
+			
+			bool justStartedDiving = _diving && !_wasDivingLastTick;
+			bool justStoppedDiving = !_diving && _wasDivingLastTick;
+
+			if (justStartedDiving && _bridge)
+			{
+				uint currentTick = _bridge.TimeManager.Tick;
+				if (_lastDiveStartTick != currentTick)
+				{
+					_lastDiveStartTick = currentTick;
+					OnStartDiving?.Invoke();
+				}
+			}
+
+			if (justStoppedDiving && _bridge)
+			{
+				uint currentTick = _bridge.TimeManager.Tick;
+				if (_lastDiveStopTick != currentTick)
+				{
+					_lastDiveStopTick = currentTick;
+					OnStopDiving?.Invoke();
+				}
+			}
+
+			_wasDivingLastTick = _diving;
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
@@ -107,16 +147,20 @@ namespace _Main.Scripts.Player
 			_shake?.ShakeAsync(0.35f, 0.08f).Forget();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private void OnLand()
 		{
 			if (!_awaitLand) return;
-
+			
+			if (_bridge)
+			{
+				_bridge.ServerBreakNearbyBoxes(_view.Position, _cfg.ImpactRadius);
+			}
+			
 			_view.NotifySlamImpact();
 			_shake?.ShakeAsync(_cfg.ShakeAmp, _cfg.ShakeDur).Forget();
-
 			_awaitLand = false;
 			_diving = false;
-
 			_isImpactDelayed = true;
 			_impactDelayTimer = _cfg.DelayAfterImact;
 		}
@@ -134,22 +178,20 @@ namespace _Main.Scripts.Player
 			_cooldown = _cfg.AfterImpactCooldown;
 		}
 
-		public PlayerState GetCurrentState()
-		{
-			if (_diving)
-			{
-				return PlayerState.Slam;
-			}
-
-			return PlayerState.Normal;
-		}
-
 		public void WriteState(ref PlayerStateData data)
 		{
 			data.IsDiving = _diving;
 			data.AwaitLand = _awaitLand;
 			data.SlamCooldown = _cooldown;
 			data.AirTime = _airTime;
+			data.IsImpactDelayed = _isImpactDelayed;
+			data.ImpactDelayTimer = _impactDelayTimer;
+			data.LandingCameraYaw = _landingCameraYaw;
+			
+			data.WasDivingLastTick = _wasDivingLastTick;
+			data.LastDiveStartTick = _lastDiveStartTick;
+			data.LastDiveStopTick = _lastDiveStopTick;
+			data.PrevInteract = _prevInteract;
 		}
 
 		public void ReadState(PlayerStateData data)
@@ -158,7 +200,14 @@ namespace _Main.Scripts.Player
 			_awaitLand = data.AwaitLand;
 			_cooldown = data.SlamCooldown;
 			_airTime = data.AirTime;
-			_isImpactDelayed = false;
+			_isImpactDelayed = data.IsImpactDelayed;
+			_impactDelayTimer = data.ImpactDelayTimer;
+			_landingCameraYaw = data.LandingCameraYaw;
+
+			_wasDivingLastTick = data.WasDivingLastTick;
+			_lastDiveStartTick = data.LastDiveStartTick;
+			_lastDiveStopTick = data.LastDiveStopTick;
+			_prevInteract = data.PrevInteract;
 		}
 	}
 }

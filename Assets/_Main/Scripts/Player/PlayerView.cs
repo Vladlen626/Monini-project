@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerView : MonoBehaviour
 {
+	public event Action OnLand;
 	[SerializeField] private Transform _cameraRoot;
 	[SerializeField] private Transform _playerVisualTransform;
 	[SerializeField] private Animator _animator;
@@ -17,9 +18,12 @@ public class PlayerView : MonoBehaviour
 	public Transform CameraRoot => _cameraRoot;
 	public Vector3 Velocity => _characterController.velocity;
 	public Animator Animator => _animator;
-	public event Action OnLand;
+	
+	public uint LastLandingTick => _lastLandingTick;
 
 	private bool _wasGrounded;
+
+	private uint _lastLandingTick;
 
 	private void Awake()
 	{
@@ -27,22 +31,21 @@ public class PlayerView : MonoBehaviour
 		_bridge = GetComponent<PlayerNetworkBridge>();
 	}
 
-	private void Update()
+	public void NotifyLanding()
 	{
-		DetectLanding();
-	}
-
-	// ReSharper disable Unity.PerformanceAnalysis
-	private void DetectLanding()
-	{
-		if (!_wasGrounded && IsGrounded)
+		uint currentTick = _bridge.TimeManager.Tick;
+		if (_lastLandingTick == currentTick)
 		{
-			OnLand?.Invoke();
+			return;
 		}
 
-		_wasGrounded = IsGrounded;
+		_lastLandingTick = currentTick;
+		OnLand?.Invoke();
 	}
-
+	public void ResetLandingTick(uint tick)
+	{
+		_lastLandingTick = tick;
+	}
 	public void ApplyMovement(Vector3 velocity, float dt)
 	{
 		_characterController.Move(velocity * dt);
@@ -58,19 +61,18 @@ public class PlayerView : MonoBehaviour
 
 	public void TeleportTo(Vector3 position, Quaternion rotation)
 	{
-		if (_characterController != null)
+		if (_characterController)
 		{
 			_characterController.enabled = false;
 		}
 
 		transform.SetPositionAndRotation(position, rotation);
 
-		if (_characterController != null)
+		if (_characterController)
 		{
 			_characterController.enabled = true;
+			_characterController.Move(Vector3.zero);
 		}
-
-		_wasGrounded = _characterController != null && _characterController.isGrounded;
 	}
 
 	public void SetRotateSpeed(float degPerSec)
@@ -90,6 +92,6 @@ public class PlayerView : MonoBehaviour
 
 	public void NotifySlamImpact()
 	{
-		_bridge.Server_PlaySlamFX(Position);
+		_bridge.Rpc_PlaySlamFX(Position);
 	}
 }

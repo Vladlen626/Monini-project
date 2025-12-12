@@ -13,6 +13,7 @@ namespace _Main.Scripts.Player
 		public PlayerState state { get; private set; } = PlayerState.Normal;
 		public int crumbsCount { get; private set; }
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public void SetState(PlayerState newState)
 		{
 			if (state == newState)
@@ -20,6 +21,7 @@ namespace _Main.Scripts.Player
 				return;
 			}
 
+			DebugNet.TryAll($"[State changed] {playerName}, new state: {newState}]");
 			state = newState;
 			OnPlayerStateChanged?.Invoke(newState);
 		}

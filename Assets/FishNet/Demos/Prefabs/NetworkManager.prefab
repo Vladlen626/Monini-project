@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e08bb003fce297d4086cf8cba5aa459a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Managing.Predicting.PredictionManager
-  _reduceReconcilesWithFramerate: 1
+  _reduceReconcilesWithFramerate: 0
   _minimumClientReconcileFramerate: 50
   _createLocalStates: 1
   _stateInterpolation: 2

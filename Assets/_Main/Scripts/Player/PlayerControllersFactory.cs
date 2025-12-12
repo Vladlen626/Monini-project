@@ -4,6 +4,7 @@ using _Main.Scripts.Player.Controllers;
 using PlatformCore.Core;
 using PlatformCore.Services;
 using PlatformCore.Services.UI;
+using UnityEngine;
 
 namespace _Main.Scripts.Player
 {
@@ -18,11 +19,10 @@ namespace _Main.Scripts.Player
 			var config = new PlayerConfig();
 			var clientStateController = new ClientPlayerStateController(bridge, view);
 			var uiService = Locator.Resolve<IUIService>();
-			
-			//prediction movement
+
 			var brain = bridge.GetComponent<PlayerNetworkBrain>();
-			var movementController = new PlayerMovementController(config, view, bridge);
-			var slamBounceController = new PlayerSlamBounceController(movementController, view, camera, config);
+			var movementController = new PlayerMovementController(config, view);
+			var slamBounceController = new PlayerSlamBounceController(movementController, view, bridge, camera, config);
 			brain.Construct(movementController, slamBounceController, input, camera.GetCameraTransform());
 
 			return new IBaseController[]
@@ -30,7 +30,6 @@ namespace _Main.Scripts.Player
 				movementController,
 				slamBounceController,
 				clientStateController,
-				new PlayerCameraController(camera, input, view),
 				new PlayerAnimationController(input, config, view, bridge),
 				new PlayerDynamicContextController<UIPlayerDynamicHud>(uiService, bridge),
 				new PlayerStaticContextController<UIPlayerStaticHud>(uiService, bridge),
@@ -40,16 +39,19 @@ namespace _Main.Scripts.Player
 		public static IBaseController[] GetPlayerServerControllers(PlayerContext.Server context)
 		{
 			var config = new PlayerConfig();
-			var movementController = new PlayerMovementController(config, context.View, context.Bridge);
-			var slamBounceController = new PlayerSlamBounceController(movementController, context.View, null, config);
-			
+			var movementController = new PlayerMovementController(config, context.View);
+			var slamBounceController = new PlayerSlamBounceController(movementController, context.View,  context.Bridge, null, config);
 			var brain = context.Bridge.GetComponent<PlayerNetworkBrain>();
 			brain.Construct(movementController, slamBounceController, null, null);
+			
+			var machine = new PlayerStateMachine(context.View, context.View.GetComponent<CharacterController>());
+			var statePrediction = new PlayerStateController(context.Model, machine, brain);
 			
 			return new IBaseController[]
 			{
 				movementController,
 				slamBounceController,
+				statePrediction,
 				new ServerPlayerSyncController(context),
 				new PlayerFlatController(context.Model, context.Bridge),
 			};

@@ -8,36 +8,23 @@ namespace _Main.Scripts.Player
 {
 	public class SlamTrigger : MonoBehaviour
 	{
-		public event Action<int> OnSlamImpactReceived;
-
 		[SerializeField] 
 		private NetworkObject _netObject;
 
+		[SerializeField]
 		private PlayerNetworkBridge _bridge;
 		
 		private Collider _collider;
 
-		private void Awake()
+		private void Start()
 		{
 			_collider = GetComponent<Collider>();
-		}
 
-		public void SetupBridge(PlayerNetworkBridge bridge)
-		{
-			_bridge = bridge;
-			_bridge.State.OnChange += OnPlayerStateChangedHandler;
-		}
-
-		private void OnDestroy()
-		{
-			_bridge.State.OnChange -= OnPlayerStateChangedHandler;
-		}
-
-		private void OnPlayerStateChangedHandler(PlayerState playerState, PlayerState next, bool asServer)
-		{
-			if (asServer)
+			if (_bridge)
 			{
-				if (next == PlayerState.Slam)
+				_bridge.State.OnChange += OnPlayerStateChangedHandler;
+
+				if (_bridge.State.Value == PlayerState.Slam)
 				{
 					EnableCollider();
 				}
@@ -45,6 +32,26 @@ namespace _Main.Scripts.Player
 				{
 					DisableCollider();
 				}
+			}
+		}
+
+		private void OnDestroy()
+		{
+			if (_bridge)
+			{
+				_bridge.State.OnChange -= OnPlayerStateChangedHandler;
+			}
+		}
+
+		private void OnPlayerStateChangedHandler(PlayerState playerState, PlayerState next, bool asServer)
+		{
+			if (next == PlayerState.Slam)
+			{
+				EnableCollider();
+			}
+			else
+			{
+				DisableCollider();
 			}
 		}
 
@@ -83,7 +90,7 @@ namespace _Main.Scripts.Player
 				return;
 			}
 
-			OnSlamImpactReceived?.Invoke(netObject.ObjectId);
+			impactReceiver.OnSlamImpact();
 		}
 	}
 }

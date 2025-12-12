@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 84698842872096416}
   - component: {fileID: 6674581506054378922}
   - component: {fileID: 3795180661037340045}
-  - component: {fileID: 5679486572877012494}
   - component: {fileID: 8720871254852800431}
   - component: {fileID: 8945463550971151926}
   m_Layer: 3
@@ -37,8 +36,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7969558339020748320}
-  - {fileID: 1819020959996438334}
   - {fileID: 8337648142941129352}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -71,7 +68,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Player.PlayerView
   _cameraRoot: {fileID: 7969558339020748320}
-  _playerVisualTransform: {fileID: 8337648142941129352}
+  _playerVisualTransform: {fileID: 8218318420656432120}
   _animator: {fileID: 3680816188755162215}
   _rotateSpeedDeg: 720
 --- !u!114 &84698842872096416
@@ -90,7 +87,6 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 3795180661037340045}
   _networkObjectCache: {fileID: 3795180661037340045}
   _slamFx: {fileID: 3432958286849152088, guid: 52b6a646c7d29e043887a33fc4a66136, type: 3}
-  _slamTrigger: {fileID: 9001986503926282278}
 --- !u!143 &6674581506054378922
 CharacterController:
   m_ObjectHideFlags: 0
@@ -136,9 +132,9 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: 84698842872096416}
-  - {fileID: 5679486572877012494}
+  - {fileID: 0}
   - {fileID: 8720871254852800431}
-  - {fileID: 1537729852328653751}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -172,52 +168,6 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
---- !u!114 &5679486572877012494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 123110683995681577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
-  _componentIndexCache: 1
-  _addedNetworkObject: {fileID: 3795180661037340045}
-  _networkObjectCache: {fileID: 3795180661037340045}
-  _componentConfiguration: 0
-  _synchronizeParent: 0
-  _packing:
-    Position: 1
-    Rotation: 1
-    Scale: 0
-  _useScaledTime: 1
-  _interpolation: 2
-  _extrapolation: 2
-  _enableTeleport: 0
-  _teleportThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
-  _interval: 1
-  _synchronizePosition: 1
-  _positionSensitivity: 0.001
-  _positionSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeRotation: 1
-  _rotationSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeScale: 1
-  _scaleSensitivity: 0.005
-  _scaleSnapping:
-    X: 0
-    Y: 0
-    Z: 0
 --- !u!114 &8720871254852800431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,6 +205,38 @@ MonoBehaviour:
   _overrideType: 3
   _updateHostVisibility: 1
   _observerConditions: []
+--- !u!1 &249990132779281845
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8218318420656432120}
+  m_Layer: 3
+  m_Name: Model
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8218318420656432120
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249990132779281845}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8807063525707770372}
+  m_Father: {fileID: 8337648142941129352}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1902193235630838939
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,12 +261,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902193235630838939}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7311139818827952172}
+  m_Father: {fileID: 8337648142941129352}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4610287375317684768
 GameObject:
@@ -295,9 +277,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8337648142941129352}
-  - component: {fileID: 1537729852328653751}
+  - component: {fileID: 5937353201356411072}
   m_Layer: 3
-  m_Name: Model
+  m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -316,10 +298,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8807063525707770372}
+  - {fileID: 7969558339020748320}
+  - {fileID: 1819020959996438334}
+  - {fileID: 8218318420656432120}
   m_Father: {fileID: 7311139818827952172}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1537729852328653751
+--- !u!114 &5937353201356411072
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -328,43 +312,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 4610287375317684768}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
+  m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
-  _componentIndexCache: 3
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.Beta.NetworkTickSmoother
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 3795180661037340045}
-  _networkObjectCache: {fileID: 3795180661037340045}
-  _componentConfiguration: 1
-  _synchronizeParent: 0
-  _packing:
-    Position: 1
-    Rotation: 1
-    Scale: 0
-  _useScaledTime: 1
-  _interpolation: 2
-  _extrapolation: 2
-  _enableTeleport: 0
-  _teleportThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
-  _interval: 1
-  _synchronizePosition: 0
-  _positionSensitivity: 0.001
-  _positionSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeRotation: 1
-  _rotationSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeScale: 1
-  _scaleSensitivity: 0.005
-  _scaleSnapping:
-    X: 0
-    Y: 0
-    Z: 0
+  _networkObjectCache: {fileID: 0}
+  _initializationSettings:
+    TargetTransform: {fileID: 7311139818827952172}
+    DetachOnStart: 1
+    AttachOnStop: 0
+  _controllerMovementSettings:
+    EnableTeleport: 0
+    TeleportThreshold: 0
+    AdaptiveInterpolationValue: 1
+    InterpolationValue: 1
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
+  _spectatorMovementSettings:
+    EnableTeleport: 0
+    TeleportThreshold: 0
+    AdaptiveInterpolationValue: 4
+    InterpolationValue: 2
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
 --- !u!1 &8321761868436017086
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,12 +362,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8321761868436017086}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7311139818827952172}
+  m_Father: {fileID: 8337648142941129352}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &8400118657877396442
 SphereCollider:
@@ -432,13 +403,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Player.SlamTrigger
   _netObject: {fileID: 3795180661037340045}
+  _bridge: {fileID: 84698842872096416}
 --- !u!1001 &9057373131859103215
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8337648142941129352}
+    m_TransformParent: {fileID: 8218318420656432120}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: d26143f9de0ee56479d0507e74cb6ab8, type: 3}
       propertyPath: m_LocalScale.x
@@ -470,15 +442,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d26143f9de0ee56479d0507e74cb6ab8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d26143f9de0ee56479d0507e74cb6ab8, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d26143f9de0ee56479d0507e74cb6ab8, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d26143f9de0ee56479d0507e74cb6ab8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

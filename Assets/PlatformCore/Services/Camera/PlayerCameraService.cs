@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using PlatformCore.Services.Factory;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services
 {

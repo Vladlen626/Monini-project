@@ -1,4 +1,5 @@
-﻿using FishNet.Object;
+﻿using System;
+using FishNet.Object;
 using FishNet.Object.Prediction;
 using UnityEngine;
 using _Main.Scripts.Player.Network;
@@ -10,10 +11,15 @@ namespace _Main.Scripts.Player
 {
 	public class PlayerNetworkBrain : TickNetworkBehaviour
 	{
+		public event Action OnStartDiving;
+		public event Action OnStopDiving;
+
 		private PlayerMovementController _movement;
 		private PlayerSlamBounceController _slam;
 		private IInputService _localInput;
 		private Transform _localCamera;
+
+		private bool isInitialized = false;
 
 		public void Construct(
 			PlayerMovementController movement,
@@ -25,25 +31,37 @@ namespace _Main.Scripts.Player
 			_slam = slam;
 			_localInput = inputService;
 			_localCamera = cameraTransform;
-		}
+			isInitialized = true;
 
-		private void Awake() => SetTickCallbacks(TickCallback.Tick);
+			_slam.OnStartDiving += () => OnStartDiving?.Invoke();
+			_slam.OnStopDiving += () => OnStopDiving?.Invoke();
+		}
+		
+		private void Awake() 
+		{
+			SetTickCallbacks(TickCallback.Tick);
+		}
 
 		protected override void TimeManager_OnTick()
 		{
-			if (IsOwner)
+			Replicate(BuildInput());
+			if (IsServerStarted)
 			{
-				Replicate(BuildInput());
-			}
-			else if (IsServerStarted)
-			{
-				Replicate(default);
+				CreateReconcile();
 			}
 		}
 
 		private PlayerInputData BuildInput()
 		{
-			if (_localInput == null) return default;
+			if (!IsOwner)
+			{
+				return default;
+			}
+			
+			if (_localInput == null)
+			{
+				return default;
+			}
 			return new PlayerInputData
 			{
 				Move = _localInput.Move,
@@ -58,14 +76,21 @@ namespace _Main.Scripts.Player
 		private void Replicate(PlayerInputData input, ReplicateState state = ReplicateState.Invalid,
 			Channel channel = Channel.Unreliable)
 		{
+			if (!isInitialized)
+			{
+				return;
+			}
 			float dt = (float)TimeManager.TickDelta;
-			
 			_movement.Simulate(dt, input);
 			_slam.Simulate(dt, input);
 		}
 
 		public override void CreateReconcile()
 		{
+			if (!isInitialized)
+			{
+				return;
+			}
 			var state = new PlayerStateData();
 			_movement.WriteState(ref state);
 			_slam.WriteState(ref state);
@@ -76,6 +101,10 @@ namespace _Main.Scripts.Player
 		[Reconcile]
 		private void Reconcile(PlayerStateData data, Channel channel = Channel.Unreliable)
 		{
+			if (!isInitialized)
+			{
+				return;
+			}
 			_movement.ReadState(data);
 			_slam.ReadState(data);
 		}

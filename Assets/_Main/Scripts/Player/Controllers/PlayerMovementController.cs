@@ -12,7 +12,7 @@ namespace _Main.Scripts.Player
 	{
 		private readonly PlayerConfig _playerConfig;
 		private readonly PlayerView _playerView;
-		private readonly PlayerNetworkBridge _bridge;
+		private readonly Vector3 _groundNormal = Vector3.up;
 
 		private bool _isGrounded;
 		private Vector3 _velocity;
@@ -20,23 +20,21 @@ namespace _Main.Scripts.Player
 		private float _coyoteTimer;
 		private float _jumpBufferTimer;
 		private float _suppressJumpTimer;
-		
+
 		private bool _prevJumpHeld;
 		private Vector3 _velXZ;
-		private Vector3 _groundNormal = Vector3.up;
 		private Vector3 _desiredDirection;
 		private Vector3 _targetVelXZ;
 		private bool _hasPendingVerticalOverride;
 		private float _pendingVerticalY;
 		private Vector3 _pendingImpulseXZ;
-	
-		
 
-		public PlayerMovementController(PlayerConfig playerConfig, PlayerView playerView, PlayerNetworkBridge bridge)
+		private bool _wasGroundedLastFrame;
+
+		public PlayerMovementController(PlayerConfig playerConfig, PlayerView playerView)
 		{
 			_playerConfig = playerConfig;
 			_playerView = playerView;
-			_bridge = bridge;
 		}
 
 		public void Simulate(float dt, PlayerInputData input)
@@ -44,7 +42,6 @@ namespace _Main.Scripts.Player
 			var camRot = Quaternion.Euler(0, input.CameraYaw, 0);
 			var cameraForward = camRot * Vector3.forward;
 			var cameraRight = camRot * Vector3.right;
-			_isGrounded = _playerView.IsGrounded;
 			_coyoteTimer = _isGrounded ? _playerConfig.coyoteTime : Mathf.Max(0f, _coyoteTimer - dt);
 
 			// === Jump buffer ===
@@ -186,6 +183,17 @@ namespace _Main.Scripts.Player
 			float rotSpeed = Mathf.Lerp(_playerConfig.minRotateSpeed, _playerConfig.maxRotateSpeed, speed01);
 			_playerView.SetRotateSpeed(rotSpeed);
 			_playerView.ApplyMovement(_velocity, dt);
+			bool wasGroundedBeforeCheck = _wasGroundedLastFrame;
+			_isGrounded = _playerView.IsGrounded;
+
+			bool justLanded = !wasGroundedBeforeCheck && _isGrounded;
+			if (justLanded)
+			{
+				_playerView.NotifyLanding();
+			}
+			
+			_wasGroundedLastFrame = _isGrounded;
+			_coyoteTimer = _isGrounded ? _playerConfig.coyoteTime : Mathf.Max(0f, _coyoteTimer - dt);
 		}
 
 		public void WriteState(ref PlayerStateData data)
@@ -196,6 +204,16 @@ namespace _Main.Scripts.Player
 			data.VerticalY = _verticalY;
 			data.IsGrounded = _isGrounded;
 			data.CoyoteTimer = _coyoteTimer;
+
+			data.VelXZ = new Vector2(_velXZ.x, _velXZ.z);
+			data.JumpBufferTimer = _jumpBufferTimer;
+			data.SuppressJumpTimer = _suppressJumpTimer;
+			data.PrevJumpHeld = _prevJumpHeld;
+			data.HasPendingVerticalOverride = _hasPendingVerticalOverride;
+			data.PendingVerticalY = _pendingVerticalY;
+			data.PendingImpulseXZ = new Vector2(_pendingImpulseXZ.x, _pendingImpulseXZ.z);
+			data.WasGroundedLastFrame = _wasGroundedLastFrame;
+			data.LastLandingTick = _playerView.LastLandingTick;
 		}
 
 		public void ReadState(PlayerStateData data)
@@ -206,11 +224,25 @@ namespace _Main.Scripts.Player
 			_verticalY = data.VerticalY;
 			_isGrounded = data.IsGrounded;
 			_coyoteTimer = data.CoyoteTimer;
+
+			_velXZ.x = data.VelXZ.x;
+			_velXZ.z = data.VelXZ.y;
+			_jumpBufferTimer = data.JumpBufferTimer;
+			_suppressJumpTimer = data.SuppressJumpTimer;
+			_prevJumpHeld = data.PrevJumpHeld;
+			_hasPendingVerticalOverride = data.HasPendingVerticalOverride;
+			_pendingVerticalY = data.PendingVerticalY;
+			_pendingImpulseXZ.x = data.PendingImpulseXZ.x;
+			_pendingImpulseXZ.z = data.PendingImpulseXZ.y;
+			_wasGroundedLastFrame = data.WasGroundedLastFrame;
+
+			_playerView.ResetLandingTick(data.LastLandingTick);
 		}
+
 		public void RequestVerticalOverride(float y)
 		{
 			_hasPendingVerticalOverride = true;
-			_pendingVerticalY = y; // заменить вертикальную скорость в ЭТОМ кадре
+			_pendingVerticalY = y;
 		}
 
 		public void AddImpulseXZ(Vector3 impulse)
