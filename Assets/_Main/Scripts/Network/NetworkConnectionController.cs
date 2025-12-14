@@ -70,7 +70,6 @@ public sealed class NetworkConnectionController : IBaseController, IActivatable,
 		if (!asServer && conn == _networkManager.ClientManager.Connection)
 		{
 			OnLocalClientLoadedStartScenes?.Invoke();
-			DebugNet.TryAll("Local player starting scenes");
 		}
 
 		if (asServer)

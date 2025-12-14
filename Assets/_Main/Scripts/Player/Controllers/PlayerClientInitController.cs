@@ -29,7 +29,6 @@ namespace _Main.Scripts.Player.Controllers
 		public void Activate()
 		{
 			_cts = new CancellationTokenSource();
-			DebugNet.TryAll("Activate client init controller");
 			_connectionEvents.OnLocalClientLoadedStartScenes += OnLocalClientLoadedStartScenes;
 		}
 

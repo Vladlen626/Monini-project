@@ -65,23 +65,6 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 	{
 		Instantiate(_slamFx, pos, Quaternion.Euler(-90, 0, 0));
 	}
-	
-	[Server]
-	public void Server_TeleportOwner(Vector3 position, Quaternion rotation)
-	{
-		if (!Owner.IsValid)
-		{
-			return;
-		}
-
-		Target_TeleportOwner(Owner, position, rotation);
-	}
-
-	[TargetRpc]
-	private void Target_TeleportOwner(NetworkConnection target, Vector3 position, Quaternion rotation)
-	{
-		_view.TeleportTo(position, rotation);
-	}
 
 	// ReSharper disable Unity.PerformanceAnalysis
 	[ServerRpc]

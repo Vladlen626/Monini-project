@@ -28,7 +28,6 @@ namespace _Main.Scripts.Player.Controllers
 
 		private void OnChangeStateHandler(PlayerState prev, PlayerState next, bool asServer)
 		{
-			DebugNet.TryAll($"[State changed] On Client {next}]");
 			_machine.ChangeState(next);
 		}
 	}

@@ -181,7 +181,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 			int index = clientId % spawnPoints.Length;
 			var point = spawnPoints[index];
 
-			ctx.Bridge.Server_TeleportOwner(point.position, point.rotation);
+			ctx.View.TeleportTo(point.position, point.rotation);
 		}
 		
 		await UniTask.Yield();

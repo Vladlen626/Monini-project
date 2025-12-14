@@ -21,7 +21,6 @@ namespace _Main.Scripts.Player
 				return;
 			}
 
-			DebugNet.TryAll($"[State changed] {playerName}, new state: {newState}]");
 			state = newState;
 			OnPlayerStateChanged?.Invoke(newState);
 		}
