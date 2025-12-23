@@ -156,7 +156,7 @@ namespace _Main.Scripts.Player
 			{
 				_bridge.ServerBreakNearbyBoxes(_view.Position, _cfg.ImpactRadius);
 			}
-			
+
 			_view.NotifySlamImpact();
 			_shake?.ShakeAsync(_cfg.ShakeAmp, _cfg.ShakeDur).Forget();
 			_awaitLand = false;

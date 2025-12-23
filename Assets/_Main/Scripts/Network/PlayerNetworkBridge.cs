@@ -43,16 +43,18 @@ public class PlayerNetworkBridge : NetworkBehaviour, ISlamImpactReceiver
 		var config = new PlayerConfig();
 		var movement = new PlayerMovementController(config, _view);
 		var slam = new PlayerSlamBounceController(movement, _view, this, null, config);
+		var flat = new PlayerFlatController(this, movement, _view, config);
 
 		var stateController = new ClientPlayerStateController(this, _view);
 
 		var brain = GetComponent<PlayerNetworkBrain>();
-		brain.Construct(movement, slam, null, null);
+		brain.Construct(movement, slam, flat, null);
 		
 		var lifecycle = Locator.Resolve<LifecycleService>();
 		lifecycle.RegisterAsync(stateController).Forget();
 		lifecycle.RegisterAsync(movement).Forget();
 		lifecycle.RegisterAsync(slam).Forget();
+		lifecycle.RegisterAsync(flat).Forget();
 	}
 
 	public void OnSlamImpact()

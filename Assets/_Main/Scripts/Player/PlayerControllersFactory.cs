@@ -23,13 +23,15 @@ namespace _Main.Scripts.Player
 			var brain = bridge.GetComponent<PlayerNetworkBrain>();
 			var movementController = new PlayerMovementController(config, view);
 			var slamBounceController = new PlayerSlamBounceController(movementController, view, bridge, camera, config);
-			brain.Construct(movementController, slamBounceController, input, camera.GetCameraTransform());
+			var flatController = new PlayerFlatController(bridge, movementController, view, config);
+			brain.Construct(movementController, slamBounceController, flatController, input, camera.GetCameraTransform());
 
 			return new IBaseController[]
 			{
 				movementController,
 				slamBounceController,
 				clientStateController,
+				flatController,
 				new PlayerAnimationController(input, config, view, bridge),
 				new PlayerDynamicContextController<UIPlayerDynamicHud>(uiService, bridge),
 				new PlayerStaticContextController<UIPlayerStaticHud>(uiService, bridge),
@@ -41,8 +43,9 @@ namespace _Main.Scripts.Player
 			var config = new PlayerConfig();
 			var movementController = new PlayerMovementController(config, context.View);
 			var slamBounceController = new PlayerSlamBounceController(movementController, context.View,  context.Bridge, null, config);
+			var flatController = new PlayerFlatController(context.Bridge, movementController, context.View, config, context.Model);
 			var brain = context.Bridge.GetComponent<PlayerNetworkBrain>();
-			brain.Construct(movementController, slamBounceController, null, null);
+			brain.Construct(movementController, slamBounceController, flatController, null, null);
 			
 			var machine = new PlayerStateMachine(context.View, context.View.GetComponent<CharacterController>());
 			var statePrediction = new PlayerStateController(context.Model, machine, brain);
@@ -52,8 +55,8 @@ namespace _Main.Scripts.Player
 				movementController,
 				slamBounceController,
 				statePrediction,
-				new ServerPlayerSyncController(context),
-				new PlayerFlatController(context.Model, context.Bridge),
+				flatController,
+				new ServerPlayerSyncController(context)
 			};
 		}
 	}

@@ -16,6 +16,7 @@ namespace _Main.Scripts.Player
 
 		private PlayerMovementController _movement;
 		private PlayerSlamBounceController _slam;
+		private PlayerFlatController _flat;
 		private IInputService _localInput;
 		private Transform _localCamera;
 
@@ -24,11 +25,13 @@ namespace _Main.Scripts.Player
 		public void Construct(
 			PlayerMovementController movement,
 			PlayerSlamBounceController slam,
+			PlayerFlatController flat,
 			IInputService inputService = null,
 			Transform cameraTransform = null)
 		{
 			_movement = movement;
 			_slam = slam;
+			_flat = flat;
 			_localInput = inputService;
 			_localCamera = cameraTransform;
 			isInitialized = true;
@@ -81,6 +84,7 @@ namespace _Main.Scripts.Player
 				return;
 			}
 			float dt = (float)TimeManager.TickDelta;
+			_flat.Simulate(dt, input);
 			_movement.Simulate(dt, input);
 			_slam.Simulate(dt, input);
 		}

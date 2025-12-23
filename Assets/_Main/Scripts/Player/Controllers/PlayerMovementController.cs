@@ -30,6 +30,7 @@ namespace _Main.Scripts.Player
 		private Vector3 _pendingImpulseXZ;
 
 		private bool _wasGroundedLastFrame;
+		private bool _isMovementSuppressed;
 
 		public PlayerMovementController(PlayerConfig playerConfig, PlayerView playerView)
 		{
@@ -39,6 +40,19 @@ namespace _Main.Scripts.Player
 
 		public void Simulate(float dt, PlayerInputData input)
 		{
+			// === РАННИЙ ВЫХОД, если движение заблокировано ===
+			if (_isMovementSuppressed)
+			{
+				// Сбрасываем все накопленные импульсы
+				_velXZ = Vector3.zero;
+				_pendingImpulseXZ = Vector3.zero;
+				_jumpBufferTimer = 0f;
+				_coyoteTimer = 0f;
+
+				return;
+			}
+			
+			
 			var camRot = Quaternion.Euler(0, input.CameraYaw, 0);
 			var cameraForward = camRot * Vector3.forward;
 			var cameraRight = camRot * Vector3.right;
@@ -48,8 +62,14 @@ namespace _Main.Scripts.Player
 			bool jumpHeld = input.Jump;
 			bool jumpPressedThisFrame = jumpHeld && !_prevJumpHeld;
 			_prevJumpHeld = jumpHeld;
-			if (jumpPressedThisFrame) _jumpBufferTimer = _playerConfig.jumpBuffer;
-			else _jumpBufferTimer = Mathf.Max(0f, _jumpBufferTimer - dt);
+			if (jumpPressedThisFrame)
+			{
+				_jumpBufferTimer = _playerConfig.jumpBuffer;
+			}
+			else
+			{
+				_jumpBufferTimer = Mathf.Max(0f, _jumpBufferTimer - dt);
+			}
 
 			// === Ввод и базовое желаемое направление (камеро-ориентированное) ===
 			Vector2 in2 = input.Move;
@@ -254,6 +274,19 @@ namespace _Main.Scripts.Player
 		public void SuppressJumpFor(float duration)
 		{
 			if (duration > _suppressJumpTimer) _suppressJumpTimer = duration;
+		}
+
+		public void SuppressMovement()
+		{
+			_isMovementSuppressed = true;
+		}
+
+		public void RestoreMovement()
+		{
+			_isMovementSuppressed = false;
+
+			_velXZ = Vector3.zero;
+			_verticalY = 0f;
 		}
 
 		private static void ProjectOnPlaneNormalized(ref Vector3 vector, Vector3 planeNormal)
