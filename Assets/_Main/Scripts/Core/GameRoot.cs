@@ -31,6 +31,7 @@ namespace _Main.Scripts.Core
 
 			//Network
 			var networkService = new NetworkService();
+			var multiplayerService = new MultiplayerRelayService(logger);
 
 			//NetworkDepended
 			var objectFactory = new ObjectFactory(resourcesService, logger, networkService);
@@ -48,6 +49,7 @@ namespace _Main.Scripts.Core
 
 			//Network Services Register
 			_serviceLocator.Register<INetworkService, NetworkService>(networkService);
+			_serviceLocator.Register<IMultiplayerService, MultiplayerRelayService>(multiplayerService);
 
 			Debug.Log("[GameRoot] Services finally registered.!");
 		}
@@ -55,17 +57,17 @@ namespace _Main.Scripts.Core
 		protected override async UniTask LaunchGameAsync(PersistentSceneContext context)
 		{
 			var cursor = _serviceLocator.Get<ICursorService>();
-			var network = _serviceLocator.Get<INetworkService>();
+			var networkService = _serviceLocator.Get<INetworkService>();
+			var multiplayerService = _serviceLocator.Get<IMultiplayerService>();
 			var objectFactory = _serviceLocator.Get<IObjectFactory>();
 			var sceneFlowService = _serviceLocator.Get<ISceneFlowService>();
 			var gameModelContext = new GameModelContext(context);
-
-			StartNetwork(network);
-			await UniTask.WaitUntil(() => network.IsServerStarted || network.IsClientStarted);
+			
 			cursor.UnlockCursor();
 			var networkConnectionController = new NetworkConnectionController();
-			var networkSpawnController = new NetworkPlayerSpawnController(network, networkConnectionController,
+			var networkSpawnController = new NetworkPlayerSpawnController(networkService, networkConnectionController,
 				objectFactory, _lifecycle, gameModelContext);
+			
 
 			var baseControllers = new IBaseController[]
 			{
@@ -80,11 +82,14 @@ namespace _Main.Scripts.Core
 				await _lifecycle.RegisterAsync(controller);
 			}
 
+			await StartNetworkWithRelayAsync(networkService, multiplayerService);
+			await UniTask.WaitUntil(() => networkService.IsServerStarted || networkService.IsClientStarted);
+
 			sceneFlowService.RequestSceneChange(SceneNames.Hub);
 			cursor.LockCursor();
 		}
 
-		private void StartNetwork(INetworkService networkService)
+		private async UniTask StartNetworkWithRelayAsync(INetworkService networkService, IMultiplayerService multiplayerService)
 		{
 #if UNITY_EDITOR
 			var tags = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags();
@@ -93,20 +98,35 @@ namespace _Main.Scripts.Core
 				var tag = tags[0];
 				if (tag == "Client")
 				{
-					networkService.StartClient();
+					// Для клиента нужен join code (запроси у пользователя)
+					Debug.LogWarning("[NETWORK] Client tag detected, but no join code provided!");
+					return;
 				}
 				else
 				{
+					// Host
+					Debug.Log("[NETWORK] Starting Host with Relay...");
+					string joinCode = await multiplayerService.CreateRoomAsync("TestRoom", 4);
+					Debug.Log($"[NETWORK] Join code: {joinCode}");
 					networkService.StartHost();
 				}
 			}
 			else
 			{
+				// Host по умолчанию
+				Debug.Log("[NETWORK] Starting Host with Relay...");
+				string joinCode = await multiplayerService.CreateRoomAsync("TestRoom", 4);
+				Debug.Log($"[NETWORK] Join code: {joinCode}");
 				networkService.StartHost();
 			}
 #else
-    network.StartHost(); // обычный билд
+    // Production билд — Host
+    Debug.Log("[NETWORK] Starting Host with Relay...");
+    string joinCode = await multiplayerService.CreateRoomAsync("ProductionRoom", 4);
+    Debug.Log($"[NETWORK] Join code: {joinCode}");
+    networkService.StartHost();
 #endif
 		}
+
 	}
 }

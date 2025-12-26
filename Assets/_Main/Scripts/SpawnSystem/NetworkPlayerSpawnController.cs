@@ -121,6 +121,7 @@ public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 
 		if (_networkModel.ownerContexts.ContainsKey(clientId))
 		{
+			Debug.Log($"[SPAWN] Player for client {clientId} already spawned");
 			return;
 		}
 

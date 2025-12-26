@@ -51,9 +51,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f78796a549a4df4bdd221c5b643dbda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Main.Scripts.Player.PlayerNetworkBrain
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 3795180661037340045}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 3795180661037340045}
   _tickCallbacks: 6
 --- !u!114 &-7921924753350460139
 MonoBehaviour:
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 670b3e73b22a87943a11ac0a9f0abe45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNetworkBridge
-  _componentIndexCache: 0
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 3795180661037340045}
   _networkObjectCache: {fileID: 3795180661037340045}
   _slamFx: {fileID: 3432958286849152088, guid: 52b6a646c7d29e043887a33fc4a66136, type: 3}
@@ -131,10 +131,10 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
+  - {fileID: 3148617717193955868}
   - {fileID: 84698842872096416}
-  - {fileID: 0}
   - {fileID: 8720871254852800431}
-  - {fileID: 0}
+  - {fileID: 5937353201356411072}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -145,6 +145,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
+  _initializedTimestamp: -8584349188307637949
   NetworkObserver: {fileID: 0}
   _enablePrediction: 1
   _predictionType: 0
@@ -159,10 +160,10 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 6
+  <PrefabId>k__BackingField: 8
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 10028612684482557435
-  <SceneId>k__BackingField: 0
+  SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -315,9 +316,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.Beta.NetworkTickSmoother
-  _componentIndexCache: 255
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 3795180661037340045}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 3795180661037340045}
   _initializationSettings:
     TargetTransform: {fileID: 7311139818827952172}
     DetachOnStart: 1
@@ -330,7 +331,7 @@ MonoBehaviour:
     SmoothedProperties: 4294967295
     SnapNonSmoothedProperties: 0
   _spectatorMovementSettings:
-    EnableTeleport: 0
+    EnableTeleport: 1
     TeleportThreshold: 0
     AdaptiveInterpolationValue: 4
     InterpolationValue: 2

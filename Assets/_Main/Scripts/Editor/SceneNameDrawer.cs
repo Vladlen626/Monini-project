@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using _Main.Scripts.Core;
 using UnityEditor;
 using UnityEngine;
 
-namespace _Main.Scripts.Core
+namespace _Main.Scripts.Editor
 {
-	public class SceneNameAttribute : PropertyAttribute
-	{
-	}
-	
 	[CustomPropertyDrawer(typeof(SceneNameAttribute))]
 	public class SceneNameDrawer : PropertyDrawer
 	{

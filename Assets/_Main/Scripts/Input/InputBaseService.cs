@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace _Main.Scripts.Core.Services
 {
-	public class InputLocalService : PlayerLocalService, IInputService
+	public class InputLocalService : PlayerLocalService, IInputService, IService
 	{
 		public event Action OnJumpPressed;
 		public event Action OnJumpReleased;

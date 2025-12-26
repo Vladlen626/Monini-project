@@ -1,4 +1,5 @@
 ﻿using _Main.Scripts.CameraFX._Main.Scripts.Player;
+using _Main.Scripts.Core;
 using _Main.Scripts.Core.Services;
 using _Main.Scripts.Player.Controllers;
 using PlatformCore.Core;
@@ -19,6 +20,9 @@ namespace _Main.Scripts.Player
 			var config = new PlayerConfig();
 			var clientStateController = new ClientPlayerStateController(bridge, view);
 			var uiService = Locator.Resolve<IUIService>();
+			var multiplayerService = Locator.Resolve<IMultiplayerService>();
+			var cursorService = Locator.Resolve<ICursorService>();
+			var networkService = Locator.Resolve<INetworkService>();
 
 			var brain = bridge.GetComponent<PlayerNetworkBrain>();
 			var movementController = new PlayerMovementController(config, view);
@@ -35,6 +39,7 @@ namespace _Main.Scripts.Player
 				new PlayerAnimationController(input, config, view, bridge),
 				new PlayerDynamicContextController<UIPlayerDynamicHud>(uiService, bridge),
 				new PlayerStaticContextController<UIPlayerStaticHud>(uiService, bridge),
+				new LobbyController(uiService, multiplayerService, networkService, input, cursorService),
 			};
 		}
 

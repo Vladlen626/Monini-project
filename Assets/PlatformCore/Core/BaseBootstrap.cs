@@ -21,7 +21,6 @@ namespace PlatformCore.Core
 			}
 
 			_persistentSceneContext = GetComponent<PersistentSceneContext>();
-			DontDestroyOnLoad(gameObject);
 
 			_gameRoot = CreateGameRoot();
 			_gameRoot.LaunchAsync(_persistentSceneContext).Forget();
