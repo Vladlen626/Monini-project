@@ -34,13 +34,13 @@ namespace _Main.Scripts.Core
 			var multiplayerService = new MultiplayerRelayService(logger);
 
 			//NetworkDepended
-			var objectFactory = new ObjectFactory(resourcesService, logger, networkService);
+			var objectFactory = new NetworkObjectFactory(resourcesService, logger, networkService);
 
 			//Register
 			_serviceLocator.Register<ISceneFlowService, SceneFlowService>(sceneFlowService);
 			_serviceLocator.Register<ILoggerService, LoggerService>(logger);
 			_serviceLocator.Register<IResourceService, ResourceService>(resourcesService);
-			_serviceLocator.Register<IObjectFactory, ObjectFactory>(objectFactory);
+			_serviceLocator.Register<IObjectFactory, NetworkObjectFactory>(objectFactory);
 			_serviceLocator.Register<IAudioService, AudioBaseService>(audioService);
 			_serviceLocator.Register<IUIService, UIBaseService>(uiService);
 			_serviceLocator.Register<ICursorService, CursorService>(cursorService);

@@ -1,23 +1,15 @@
-﻿using _Main.Scripts.Core;
-using Cysharp.Threading.Tasks;
-using FishNet;
-using FishNet.Connection;
-using FishNet.Object;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-namespace PlatformCore.Services.Factory
+namespace PlatformCore.Services.Factory.PlatformCore.Services.Factory
 {
-	public class ObjectFactory : BaseAsyncService, IObjectFactory, INetworkObjectFactory
+	public class ObjectFactory : BaseAsyncService, IObjectFactory
 	{
 		private readonly IResourceService _resourceService;
-		private readonly INetworkService _networkService;
 		private readonly ILoggerService _loggerService;
 
-		public ObjectFactory(IResourceService resourceService, ILoggerService loggerService,
-			INetworkService networkService)
+		public ObjectFactory(IResourceService resourceService, ILoggerService loggerService)
 		{
-			_networkService = networkService;
 			_resourceService = resourceService;
 			_loggerService = loggerService;
 		}
@@ -44,8 +36,7 @@ namespace PlatformCore.Services.Factory
 			return instance;
 		}
 
-		public async UniTask<T> CreateAsync<T>(string address, Vector3 position, Quaternion rotation,
-			Transform parent = null)
+		public async UniTask<T> CreateAsync<T>(string address, Vector3 position, Quaternion rotation, Transform parent = null)
 			where T : Component
 		{
 			_loggerService?.Log($"[ObjectFactory] Creating component '{typeof(T).Name}' from: {address}");
@@ -60,8 +51,7 @@ namespace PlatformCore.Services.Factory
 			var component = gameObject.GetComponent<T>();
 			if (component == null)
 			{
-				_loggerService?.LogError(
-					$"[ObjectFactory] ❌ Component '{typeof(T).Name}' missing on prefab '{address}'");
+				_loggerService?.LogError($"[ObjectFactory] ❌ Component '{typeof(T).Name}' missing on prefab '{address}'");
 				Object.Destroy(gameObject);
 				return null;
 			}
@@ -72,7 +62,7 @@ namespace PlatformCore.Services.Factory
 
 		public void Destroy(GameObject obj)
 		{
-			if (!obj)
+			if (obj == null)
 			{
 				_loggerService?.LogWarning("[ObjectFactory] ⚠️ Tried to destroy null object");
 				return;
@@ -80,55 +70,6 @@ namespace PlatformCore.Services.Factory
 
 			_loggerService?.Log($"[ObjectFactory] Destroying: {obj.name}");
 			Object.Destroy(obj);
-		}
-
-		public async UniTask<NetworkObject> CreateNetworkAsync(
-			string address, Vector3 position, Quaternion rotation, NetworkConnection owner = null,
-			Scene scene = default)
-		{
-			var prefab = await _resourceService.LoadAsync<GameObject>(address);
-			if (prefab == null)
-			{
-				_loggerService.LogError($"[ObjectFactory] Network prefab not found: {address}");
-				return null;
-			}
-
-			var nob = prefab.GetComponent<NetworkObject>();
-			if (nob == null)
-			{
-				_loggerService.LogError($"[ObjectFactory] Prefab {address} has no NetworkObject");
-				return null;
-			}
-
-			if (!_networkService.IsServer)
-			{
-				_loggerService.LogWarning($"[ObjectFactory] Tried to spawn network object from client: {address}");
-				return null;
-			}
-
-			var instance = Object.Instantiate(nob, position, rotation);
-			_networkService.Spawn(instance, owner, scene);
-			return instance;
-		}
-
-		public void DestroyNetwork(NetworkObject nob)
-		{
-			if (nob == null) return;
-
-			if (!_networkService.IsServer)
-			{
-				_loggerService.LogWarning("[ObjectFactory] ⚠️ Tried to despawn network object from client");
-				return;
-			}
-
-			if (nob.IsSpawned)
-			{
-				_networkService.Despawn(nob);
-			}
-			else
-			{
-				Object.Destroy(nob.gameObject);
-			}
 		}
 	}
 }
