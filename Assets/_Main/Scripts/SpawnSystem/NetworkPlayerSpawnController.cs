@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using _Main.Scripts.Core;
-using _Main.Scripts.Player;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Infrastructure.Lifecycle;
 using PlatformCore.Services.Factory;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public sealed class NetworkPlayerSpawnController : IBaseController, IActivatable
 {

@@ -7,8 +7,6 @@
     "FMODUnity",
     "Unity.Cinemachine",
     "UnitySplines",
-    "DOTween.Modules",
-    "Unity.Netcode.Runtime",
-    "FishNet.Runtime"
+    "DOTween.Modules"
   ]
 }

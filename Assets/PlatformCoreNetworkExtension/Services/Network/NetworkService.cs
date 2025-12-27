@@ -1,11 +1,7 @@
-﻿using System;
-using FishNet;
+﻿using FishNet;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Object;
-using FishNet.Transporting;
-using PlatformCore.Core;
-using Object = UnityEngine.Object;
 
 namespace _Main.Scripts.Core
 {
